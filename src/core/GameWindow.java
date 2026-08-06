@@ -6,9 +6,12 @@ public class GameWindow extends JFrame{
 
     public GameWindow(){
         setTitle("Escape Room");
-        setSize(960,640);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
+
+        GamePanel panel = new GamePanel();
+        add(panel);
+        pack();
         setVisible(true);
     }
     
