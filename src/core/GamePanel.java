@@ -5,12 +5,28 @@ import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.Timer;
+
+import java.awt.event.ActionListener;
+
 public class GamePanel extends JPanel{
 
-    public GamePanel(){
+    private Timer gameTimer;
 
+    public GamePanel(){
         setPreferredSize(new Dimension(960,640));
         setBackground(Color.BLACK);
+
+        this.gameTimer = new Timer(16, e -> {
+            update();
+            repaint();
+        });
+        gameTimer.start();
+
+        
+    }
+
+    private void update(){
 
     }
 
