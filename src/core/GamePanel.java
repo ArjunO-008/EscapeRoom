@@ -39,20 +39,14 @@ public class GamePanel extends JPanel{
 
     private void update(){
         final int speed = 4;
+        int dx = 0, dy = 0;
 
-        if(this.inputSystem.isUp()){
-            player.setY(player.getY() - speed);
-        }
-        if(this.inputSystem.isDown()){
-            player.setY(player.getY() + speed);
-        }
-        if(this.inputSystem.isLeft()){
-            player.setX(player.getX() - speed);
-        }
-        if(this.inputSystem.isRight()){
-            player.setX(player.getX() + speed);
-        }
-        
+        if(this.inputSystem.isUp()) dy -= speed;
+        if(this.inputSystem.isDown()) dy += speed;
+        if(this.inputSystem.isLeft()) dx -= speed;
+        if(this.inputSystem.isRight()) dx += speed;
+
+        player.moveBy(dx, dy, getWidth(), getHeight());       
 
     }
 

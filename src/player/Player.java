@@ -18,6 +18,23 @@ public class Player {
         this.color = Color.CYAN;
     }
 
+    public void moveBy(int dx,int dy, int panelWidth,int panelHeight){
+        int newX = this.x + dx;
+        int newY = this.y + dy;
+
+        if(newX < 0) newX = 0;
+        if(newX > panelWidth - width) newX = panelWidth - width;
+
+        if(newY < 0) newY = 0;
+        if(newY > panelHeight - height) newY = panelHeight - height;
+
+        this.x = newX;
+        this.y = newY;
+        
+        
+
+    }
+
     public int getX() {
         return this.x;
     }
