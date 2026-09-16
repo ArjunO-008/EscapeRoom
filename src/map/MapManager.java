@@ -7,41 +7,37 @@ import java.util.Map;
 public class MapManager {
 
     private final Map<String, TileMap> maps = new LinkedHashMap<>();
+
     private String currentMapName;
 
     public MapManager() {
 
-        /*
-         * Load all game maps.
-         *
-         * All TMX files must be inside:
-         * src/map/
-         */
-
         loadMap(
             "bedroom",
-            "src/map/Bedroom(3).tmx"
+            "src/map/Bedroom.tmx"
         );
 
         loadMap(
             "kitchen",
-            "src/map/Kitchen(3).tmx"
+            "src/map/Kitchen.tmx"
         );
 
         loadMap(
             "living_room",
-            "src/map/Living_room(4).tmx"
+            "src/map/Living_room.tmx"
         );
 
         loadMap(
             "study",
-            "src/map/untitled(3).tmx"
+            "src/map/Study.tmx"
         );
 
-        /*
-         * Start the game in the living room.
-         */
+        // Start in living room
         currentMapName = "living_room";
+
+        System.out.println(
+            "Starting map: " + currentMapName
+        );
     }
 
     private void loadMap(
@@ -50,12 +46,20 @@ public class MapManager {
     ) {
 
         System.out.println(
+            "========================================"
+        );
+
+        System.out.println(
             "Loading map: " + name
         );
 
         TileMap map = new TileMap(path);
 
         maps.put(name, map);
+
+        System.out.println(
+            "Map loaded: " + name
+        );
     }
 
     public void switchMap(String name) {
@@ -72,16 +76,13 @@ public class MapManager {
         currentMapName = name;
 
         System.out.println(
-            "Current map: " +
-            currentMapName
+            "Switched to map: " + currentMapName
         );
     }
 
     public TileMap getCurrentMap() {
 
-        return maps.get(
-            currentMapName
-        );
+        return maps.get(currentMapName);
     }
 
     public String getCurrentMapName() {
@@ -91,8 +92,7 @@ public class MapManager {
 
     public void draw(Graphics2D g2) {
 
-        TileMap currentMap =
-            getCurrentMap();
+        TileMap currentMap = getCurrentMap();
 
         if (currentMap != null) {
             currentMap.draw(g2);

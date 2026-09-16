@@ -24,9 +24,6 @@ public class GamePanel extends JPanel {
 
     public GamePanel() {
 
-        /*
-         * Game window size
-         */
         setPreferredSize(
             new Dimension(960, 640)
         );
@@ -39,31 +36,27 @@ public class GamePanel extends JPanel {
         mapManager = new MapManager();
 
         /*
-         * Create player.
-         *
-         * This is the initial position
-         * inside the living room.
+         * Create player
          */
         player = new Player(
-            400,
-            300
+            100,
+            100
         );
 
         /*
-         * Keyboard input
+         * Keyboard movement
          */
         inputSystem = new InputSystem(this);
 
         setFocusable(true);
 
+        /*
+         * Setup room switching
+         */
         setupMapControls();
 
-        requestFocusInWindow();
-
         /*
-         * Game loop
-         *
-         * 16 ms ~= 60 FPS
+         * Start game loop
          */
         gameTimer = new Timer(
             16,
@@ -79,25 +72,33 @@ public class GamePanel extends JPanel {
     }
 
     /*
-     * Map switching controls.
+     * =========================================================
+     * MAP CONTROLS
+     * =========================================================
      *
      * 1 = Bedroom
      * 2 = Kitchen
      * 3 = Living Room
      * 4 = Study
+     *
+     * WHEN_IN_FOCUSED_WINDOW means the keys work while
+     * the game window is active, even if the JPanel itself
+     * does not have keyboard focus.
      */
     private void setupMapControls() {
 
         /*
          * 1 -> Bedroom
          */
-        getInputMap().put(
+        getInputMap(
+            WHEN_IN_FOCUSED_WINDOW
+        ).put(
             KeyStroke.getKeyStroke("1"),
-            "map-bedroom"
+            "switch-bedroom"
         );
 
         getActionMap().put(
-            "map-bedroom",
+            "switch-bedroom",
             new AbstractAction() {
 
                 @Override
@@ -107,8 +108,8 @@ public class GamePanel extends JPanel {
 
                     changeMap(
                         "bedroom",
-                        400,
-                        300
+                        100,
+                        100
                     );
                 }
             }
@@ -117,13 +118,15 @@ public class GamePanel extends JPanel {
         /*
          * 2 -> Kitchen
          */
-        getInputMap().put(
+        getInputMap(
+            WHEN_IN_FOCUSED_WINDOW
+        ).put(
             KeyStroke.getKeyStroke("2"),
-            "map-kitchen"
+            "switch-kitchen"
         );
 
         getActionMap().put(
-            "map-kitchen",
+            "switch-kitchen",
             new AbstractAction() {
 
                 @Override
@@ -133,8 +136,8 @@ public class GamePanel extends JPanel {
 
                     changeMap(
                         "kitchen",
-                        400,
-                        300
+                        100,
+                        100
                     );
                 }
             }
@@ -143,13 +146,15 @@ public class GamePanel extends JPanel {
         /*
          * 3 -> Living Room
          */
-        getInputMap().put(
+        getInputMap(
+            WHEN_IN_FOCUSED_WINDOW
+        ).put(
             KeyStroke.getKeyStroke("3"),
-            "map-living-room"
+            "switch-living-room"
         );
 
         getActionMap().put(
-            "map-living-room",
+            "switch-living-room",
             new AbstractAction() {
 
                 @Override
@@ -159,8 +164,8 @@ public class GamePanel extends JPanel {
 
                     changeMap(
                         "living_room",
-                        400,
-                        300
+                        100,
+                        100
                     );
                 }
             }
@@ -169,13 +174,15 @@ public class GamePanel extends JPanel {
         /*
          * 4 -> Study
          */
-        getInputMap().put(
+        getInputMap(
+            WHEN_IN_FOCUSED_WINDOW
+        ).put(
             KeyStroke.getKeyStroke("4"),
-            "map-study"
+            "switch-study"
         );
 
         getActionMap().put(
-            "map-study",
+            "switch-study",
             new AbstractAction() {
 
                 @Override
@@ -185,8 +192,8 @@ public class GamePanel extends JPanel {
 
                     changeMap(
                         "study",
-                        400,
-                        300
+                        100,
+                        100
                     );
                 }
             }
@@ -194,8 +201,7 @@ public class GamePanel extends JPanel {
     }
 
     /*
-     * Change the current map
-     * and reposition the player.
+     * Change room and reposition player
      */
     private void changeMap(
         String mapName,
@@ -203,16 +209,22 @@ public class GamePanel extends JPanel {
         int playerY
     ) {
 
-        mapManager.switchMap(
-            mapName
+        System.out.println(
+            "Changing room to: " + mapName
         );
+
+        mapManager.switchMap(mapName);
 
         player.setX(playerX);
         player.setY(playerY);
+
+        repaint();
     }
 
     /*
-     * Game update
+     * =========================================================
+     * GAME UPDATE
+     * =========================================================
      */
     private void update() {
 
@@ -246,7 +258,9 @@ public class GamePanel extends JPanel {
     }
 
     /*
-     * Rendering
+     * =========================================================
+     * DRAWING
+     * =========================================================
      */
     @Override
     protected void paintComponent(
@@ -259,7 +273,7 @@ public class GamePanel extends JPanel {
             (Graphics2D) g.create();
 
         /*
-         * Draw current map
+         * Draw current room
          */
         mapManager.draw(g2);
 
