@@ -11,20 +11,51 @@ public class MapManager {
 
     public MapManager() {
 
-        loadMap("living_room", "src/map/Living_room.tmx");
-        loadMap("kitchen", "src/map/Kitchen.tmx");
-        loadMap("bedroom", "src/map/Bedroom.tmx");
+        /*
+         * Load all game maps.
+         *
+         * All TMX files must be inside:
+         * src/map/
+         */
+
+        loadMap(
+            "bedroom",
+            "src/map/Bedroom(3).tmx"
+        );
+
+        loadMap(
+            "kitchen",
+            "src/map/Kitchen(3).tmx"
+        );
+
+        loadMap(
+            "living_room",
+            "src/map/Living_room(4).tmx"
+        );
+
+        loadMap(
+            "study",
+            "src/map/untitled(3).tmx"
+        );
+
+        /*
+         * Start the game in the living room.
+         */
+        currentMapName = "living_room";
     }
 
-    private void loadMap(String name, String path) {
+    private void loadMap(
+        String name,
+        String path
+    ) {
+
+        System.out.println(
+            "Loading map: " + name
+        );
 
         TileMap map = new TileMap(path);
 
         maps.put(name, map);
-
-        if (currentMapName == null) {
-            currentMapName = name;
-        }
     }
 
     public void switchMap(String name) {
@@ -41,13 +72,16 @@ public class MapManager {
         currentMapName = name;
 
         System.out.println(
-            "Switched to map: " + currentMapName
+            "Current map: " +
+            currentMapName
         );
     }
 
     public TileMap getCurrentMap() {
 
-        return maps.get(currentMapName);
+        return maps.get(
+            currentMapName
+        );
     }
 
     public String getCurrentMapName() {
@@ -57,7 +91,8 @@ public class MapManager {
 
     public void draw(Graphics2D g2) {
 
-        TileMap currentMap = getCurrentMap();
+        TileMap currentMap =
+            getCurrentMap();
 
         if (currentMap != null) {
             currentMap.draw(g2);
