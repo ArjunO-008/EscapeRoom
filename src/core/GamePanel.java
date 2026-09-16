@@ -79,7 +79,6 @@ public class GamePanel extends JPanel {
      * 1 = Bedroom
      * 2 = Kitchen
      * 3 = Living Room
-     * 4 = Study
      *
      * WHEN_IN_FOCUSED_WINDOW means the keys work while
      * the game window is active, even if the JPanel itself
@@ -171,33 +170,6 @@ public class GamePanel extends JPanel {
             }
         );
 
-        /*
-         * 4 -> Study
-         */
-        getInputMap(
-            WHEN_IN_FOCUSED_WINDOW
-        ).put(
-            KeyStroke.getKeyStroke("4"),
-            "switch-study"
-        );
-
-        getActionMap().put(
-            "switch-study",
-            new AbstractAction() {
-
-                @Override
-                public void actionPerformed(
-                    ActionEvent e
-                ) {
-
-                    changeMap(
-                        "study",
-                        100,
-                        100
-                    );
-                }
-            }
-        );
     }
 
     /*

@@ -26,12 +26,6 @@ public class MapManager {
             "living_room",
             "src/map/Living_room.tmx"
         );
-
-        loadMap(
-            "study",
-            "src/map/Study.tmx"
-        );
-
         // Start in living room
         currentMapName = "living_room";
 
