@@ -1,10 +1,11 @@
 package input;
 
-import javax.swing.JComponent;
-import javax.swing.AbstractAction;
-import javax.swing.KeyStroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+
 
 public class InputSystem {
     private boolean up, down, left, right;
@@ -76,6 +77,20 @@ public class InputSystem {
                 right = false;
             }
         });
+        component.getInputMap().put(
+            KeyStroke.getKeyStroke(KeyEvent.VK_1, 0),
+            "map-living-room"
+        );
+
+        component.getInputMap().put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_2, 0),
+                "map-kitchen"
+        );
+
+        component.getInputMap().put(
+            KeyStroke.getKeyStroke(KeyEvent.VK_3, 0),
+            "map-bedroom"
+        );
 
     }
 
