@@ -12,10 +12,18 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import map.MapManager;
 import player.Player;
+import ui.LoadingScreen;
+import ui.MainMenu;
+import ui.WinScreen;
 
 public class GamePanel extends JPanel {
 
     private Timer gameTimer;
+
+    private LoadingScreen loadingScreen;
+    private MainMenu mainMenu;
+    private WinScreen winScreen;
+       
 
     private Player player;
     private InputSystem inputSystem;
@@ -29,6 +37,14 @@ public class GamePanel extends JPanel {
         );
 
         setBackground(Color.BLACK);
+
+        loadingScreen = new LoadingScreen();
+        mainMenu = new MainMenu();
+        winScreen = new WinScreen();
+
+        loadingScreen.show();
+        mainMenu.show();
+        winScreen.show();
 
         /*
          * Load all maps
