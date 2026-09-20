@@ -15,6 +15,7 @@ import player.Player;
 import ui.LoadingScreen;
 import ui.MainMenu;
 import ui.WinScreen;
+import puzzle.PuzzleManager;
 
 public class GamePanel extends JPanel {
 
@@ -23,6 +24,8 @@ public class GamePanel extends JPanel {
     private LoadingScreen loadingScreen;
     private MainMenu mainMenu;
     private WinScreen winScreen;
+
+    private PuzzleManager puzzleManager;
        
 
     private Player player;
@@ -38,6 +41,7 @@ public class GamePanel extends JPanel {
 
         setBackground(Color.BLACK);
 
+        // Loading Screen, Main menu and Win Screen.
         loadingScreen = new LoadingScreen();
         mainMenu = new MainMenu();
         winScreen = new WinScreen();
@@ -45,6 +49,10 @@ public class GamePanel extends JPanel {
         loadingScreen.show();
         mainMenu.show();
         winScreen.show();
+
+        //Puzzle Loading.
+        puzzleManager = new PuzzleManager();
+        puzzleManager.openPuzzle(1);
 
         /*
          * Load all maps
