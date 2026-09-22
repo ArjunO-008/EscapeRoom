@@ -59,7 +59,8 @@ public class GamePanel extends JPanel {
          */
         loadRoom(1);
 
-        
+        // Test Room Selector
+        RoomSelector.showRoomSelector("Bedroom");
 
         // Input handling (movement only)
         inputSystem = new InputSystem(this);
