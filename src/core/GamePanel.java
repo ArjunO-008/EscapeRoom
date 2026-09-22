@@ -67,7 +67,7 @@ public class GamePanel extends JPanel {
                 loadRoom(1);
 
                 // Test Room Selector
-                roomSelector.show(2);
+                //roomSelector.show(2);
 
                 // Input handling (movement only)
                 inputSystem = new InputSystem(this);
@@ -159,9 +159,7 @@ public class GamePanel extends JPanel {
                 mapManager.draw(g2);
                 roomSelector.draw(g2, getWidth(), getHeight());
 
-                g2.setColor(player.getColor());
-                g2.fillRect(player.getX(), player.getY(), player.getWidth(), player.getHeight());
-
+                player.draw(g2);
                 g2.dispose();
         }
 

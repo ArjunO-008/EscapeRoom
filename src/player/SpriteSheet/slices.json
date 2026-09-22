@@ -1,0 +1,265 @@
+{
+  "meta": {
+    "app": "https://gameimagekit.com",
+    "version": "1.0",
+    "image": "ChatGPT Image Sep 22, 2026, 10_28_37 PM",
+    "size": {
+      "w": 1536,
+      "h": 1024
+    }
+  },
+  "slices": [
+    {
+      "name": "SpriteSheet_001",
+      "x": 427,
+      "y": 197,
+      "w": 61,
+      "h": 124,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_002",
+      "x": 427,
+      "y": 329,
+      "w": 61,
+      "h": 119,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_003",
+      "x": 562,
+      "y": 200,
+      "w": 57,
+      "h": 121,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_004",
+      "x": 563,
+      "y": 333,
+      "w": 56,
+      "h": 111,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_005",
+      "x": 636,
+      "y": 200,
+      "w": 54,
+      "h": 121,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_006",
+      "x": 636,
+      "y": 332,
+      "w": 55,
+      "h": 112,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_007",
+      "x": 728,
+      "y": 201,
+      "w": 55,
+      "h": 120,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_008",
+      "x": 730,
+      "y": 333,
+      "w": 55,
+      "h": 111,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_009",
+      "x": 803,
+      "y": 331,
+      "w": 55,
+      "h": 113,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_010",
+      "x": 804,
+      "y": 200,
+      "w": 53,
+      "h": 120,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_011",
+      "x": 892,
+      "y": 332,
+      "w": 55,
+      "h": 114,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_012",
+      "x": 893,
+      "y": 201,
+      "w": 53,
+      "h": 118,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_013",
+      "x": 966,
+      "y": 332,
+      "w": 54,
+      "h": 112,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_014",
+      "x": 967,
+      "y": 200,
+      "w": 53,
+      "h": 118,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_015",
+      "x": 428,
+      "y": 464,
+      "w": 59,
+      "h": 113,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_016",
+      "x": 560,
+      "y": 470,
+      "w": 53,
+      "h": 100,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_017",
+      "x": 636,
+      "y": 469,
+      "w": 53,
+      "h": 101,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_018",
+      "x": 728,
+      "y": 470,
+      "w": 53,
+      "h": 100,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_019",
+      "x": 804,
+      "y": 470,
+      "w": 53,
+      "h": 99,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_020",
+      "x": 894,
+      "y": 470,
+      "w": 52,
+      "h": 102,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_021",
+      "x": 966,
+      "y": 470,
+      "w": 53,
+      "h": 102,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_022",
+      "x": 558,
+      "y": 580,
+      "w": 51,
+      "h": 88,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_023",
+      "x": 637,
+      "y": 580,
+      "w": 52,
+      "h": 89,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_024",
+      "x": 727,
+      "y": 580,
+      "w": 51,
+      "h": 87,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_025",
+      "x": 804,
+      "y": 580,
+      "w": 50,
+      "h": 89,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_026",
+      "x": 893,
+      "y": 579,
+      "w": 51,
+      "h": 91,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_027",
+      "x": 966,
+      "y": 580,
+      "w": 51,
+      "h": 89,
+      "canvasW": 61,
+      "canvasH": 124
+    },
+    {
+      "name": "SpriteSheet_028",
+      "x": 428,
+      "y": 577,
+      "w": 58,
+      "h": 95,
+      "canvasW": 61,
+      "canvasH": 124
+    }
+  ]
+}
