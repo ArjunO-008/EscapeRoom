@@ -12,6 +12,9 @@ import player.Player;
 import puzzle.PuzzleManager;
 import ui.*;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 public class GamePanel extends JPanel {
 
     private Timer gameTimer;
@@ -19,6 +22,8 @@ public class GamePanel extends JPanel {
     private LoadingScreen loadingScreen;
     private MainMenu mainMenu;
     private WinScreen winScreen;
+
+    private RoomSelector roomSelector;
 
     private PuzzleManager puzzleManager;
 
@@ -41,6 +46,8 @@ public class GamePanel extends JPanel {
         mainMenu.show();
         winScreen.show();
 
+        roomSelector = new RoomSelector();
+
         // Puzzle setup
         puzzleManager = new PuzzleManager();
         puzzleManager.openPuzzle(1); // .openPuzzle(ID)
@@ -60,11 +67,21 @@ public class GamePanel extends JPanel {
         loadRoom(1);
 
         // Test Room Selector
-        RoomSelector.showRoomSelector("Bedroom");
+        roomSelector.show(1);
 
         // Input handling (movement only)
         inputSystem = new InputSystem(this);
         setFocusable(true);
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (roomSelector.isVisible()) {
+                    roomSelector.handleClick(e.getX(), e.getY(), getWidth(), getHeight());
+                    repaint();
+                }
+            }
+        });
 
         // Game loop (~60 FPS)
         gameTimer = new Timer(16, e -> {
@@ -123,10 +140,12 @@ public class GamePanel extends JPanel {
         Graphics2D g2 = (Graphics2D) g.create();
 
         mapManager.draw(g2);
+        roomSelector.draw(g2, getWidth(), getHeight());
 
         g2.setColor(player.getColor());
         g2.fillRect(player.getX(), player.getY(), player.getWidth(), player.getHeight());
 
         g2.dispose();
     }
+
 }
