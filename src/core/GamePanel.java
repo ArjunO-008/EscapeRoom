@@ -67,7 +67,7 @@ public class GamePanel extends JPanel {
                 loadRoom(1);
 
                 // Test Room Selector
-                //roomSelector.show(2);
+                // roomSelector.show(2);
 
                 // Input handling (movement only)
                 inputSystem = new InputSystem(this);
@@ -139,14 +139,19 @@ public class GamePanel extends JPanel {
 
                 if (inputSystem.isUp())
                         dy -= speed;
+
                 if (inputSystem.isDown())
                         dy += speed;
+
                 if (inputSystem.isLeft())
                         dx -= speed;
+
                 if (inputSystem.isRight())
                         dx += speed;
 
                 player.moveBy(dx, dy, getWidth(), getHeight());
+
+                player.update();
         }
 
         /** Renders the current room and the player. */
