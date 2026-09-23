@@ -38,63 +38,31 @@ public class GamePanel extends JPanel {
                 setPreferredSize(new Dimension(960, 640));
                 setBackground(Color.BLACK);
 
-                System.out.println("========== SAVE TEST ==========");
+                // System.out.println("========== NEW GAME TEST ==========");
 
-                // Create some fake game data
-                int[] inventory = { 1, 3, 5 };
+                // SaveManager.createNewSave();
 
-                boolean[] puzzles = {
-                                false,
-                                true,
-                                false,
-                                true
-                };
+                // SaveData data = SaveManager.load();
 
-                SaveData testData = new SaveData(
-                                true, // continuity
-                                352.5f, // player X
-                                184.0f, // player Y
-                                2, // room ID
-                                inventory,
-                                puzzles);
+                // System.out.println("Continuity: "
+                //                 + data.isContinuity());
 
-                // Save it
-                SaveManager.save(testData);
+                // System.out.println("Player X: "
+                //                 + data.getPlayerX());
 
-                // Load it
-                SaveData loadedData = SaveManager.load();
+                // System.out.println("Player Y: "
+                //                 + data.getPlayerY());
 
-                // Print loaded data
-                System.out.println("Continuity: "
-                                + loadedData.isContinuity());
+                // System.out.println("Room ID: "
+                //                 + data.getCurrentRoomId());
 
-                System.out.println("Player X: "
-                                + loadedData.getPlayerX());
+                // System.out.println("Inventory size: "
+                //                 + data.getInventory().length);
 
-                System.out.println("Player Y: "
-                                + loadedData.getPlayerY());
+                // System.out.println("Puzzle 1 solved: "
+                //                 + data.getPuzzlesCompleted()[0]);
 
-                System.out.println("Room ID: "
-                                + loadedData.getCurrentRoomId());
-
-                System.out.println("Inventory:");
-
-                for (int item : loadedData.getInventory()) {
-                        System.out.println("Item ID: " + item);
-                }
-
-                System.out.println("Puzzles:");
-
-                boolean[] loadedPuzzles = loadedData.getPuzzlesCompleted();
-
-                for (int i = 0; i < loadedPuzzles.length; i++) {
-
-                        System.out.println(
-                                        "Puzzle " + (i + 1)
-                                                        + ": " + loadedPuzzles[i]);
-                }
-
-                System.out.println("================================");
+                // System.out.println("===================================");
 
                 // UI screens
                 loadingScreen = new LoadingScreen();
@@ -104,7 +72,8 @@ public class GamePanel extends JPanel {
                 // Use Commands and Use For testing Out each UI Screens.
                 loadingScreen.show();
                 mainMenu.show();
-                winScreen.show();
+                mainMenu.startNewGame();
+                //winScreen.show();
 
                 roomSelector = new RoomSelector();
 

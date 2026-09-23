@@ -9,8 +9,19 @@ public class SaveManager {
     // --------------------------------------------------
 
     private static final String DATA_FOLDER = "data";
+
     private static final String SAVE_FILE =
             DATA_FOLDER + File.separator + "save.dat";
+
+
+    // --------------------------------------------------
+    // Initialize save system
+    // --------------------------------------------------
+
+    public static void initializeDataFolder() {
+
+        createDataFolder();
+    }
 
 
     // --------------------------------------------------
@@ -34,13 +45,14 @@ public class SaveManager {
         File dataFolder = new File(DATA_FOLDER);
 
         if (!dataFolder.exists()) {
+
             dataFolder.mkdirs();
         }
     }
 
 
     // --------------------------------------------------
-    // Create a new save
+    // Create a new game
     // --------------------------------------------------
 
     public static void createNewSave() {
@@ -50,21 +62,58 @@ public class SaveManager {
 
         File saveFile = new File(SAVE_FILE);
 
+
         try {
 
-            // Delete old save if it exists
+            // ------------------------------------------
+            // Delete previous save
+            // ------------------------------------------
+
             if (saveFile.exists()) {
+
                 saveFile.delete();
             }
 
-            // Create an empty save file
-            saveFile.createNewFile();
 
-            System.out.println("New Save Created");
+            // ------------------------------------------
+            // Create initial game state
+            // ------------------------------------------
 
-        } catch (IOException e) {
+            int[] inventory = new int[0];
 
-            System.out.println("Failed to create save file.");
+            boolean[] puzzlesCompleted =
+                    new boolean[1];
+
+
+            SaveData newGame = new SaveData(
+
+                    true,       // Continuity
+
+                    100.0f,     // Player X
+                    100.0f,     // Player Y
+
+                    1,          // Starting Room ID
+
+                    inventory,
+
+                    puzzlesCompleted
+            );
+
+
+            // ------------------------------------------
+            // Save initial game state
+            // ------------------------------------------
+
+            save(newGame);
+
+        }
+
+        catch (Exception e) {
+
+            System.out.println(
+                    "Failed to create new game."
+            );
+
             e.printStackTrace();
         }
     }
@@ -79,22 +128,27 @@ public class SaveManager {
         // Make sure data/ exists
         createDataFolder();
 
-        try (
-            FileOutputStream fileOutputStream =
-                    new FileOutputStream(SAVE_FILE);
 
-            ObjectOutputStream objectOutputStream =
-                    new ObjectOutputStream(fileOutputStream)
+        try (
+                FileOutputStream fileOutputStream =
+                        new FileOutputStream(SAVE_FILE);
+
+                ObjectOutputStream objectOutputStream =
+                        new ObjectOutputStream(fileOutputStream)
         ) {
 
-            // Write the SaveData object into save.dat
             objectOutputStream.writeObject(saveData);
 
             System.out.println("Game Saved.");
 
-        } catch (IOException e) {
+        }
 
-            System.out.println("Failed to save game.");
+        catch (IOException e) {
+
+            System.out.println(
+                    "Failed to save game."
+            );
+
             e.printStackTrace();
         }
     }
@@ -108,34 +162,42 @@ public class SaveManager {
 
         File saveFile = new File(SAVE_FILE);
 
+
         // No save exists
         if (!saveFile.exists()) {
 
-            System.out.println("No save found.");
+            System.out.println(
+                    "No save found."
+            );
 
             return null;
         }
 
 
         try (
-            FileInputStream fileInputStream =
-                    new FileInputStream(SAVE_FILE);
+                FileInputStream fileInputStream =
+                        new FileInputStream(SAVE_FILE);
 
-            ObjectInputStream objectInputStream =
-                    new ObjectInputStream(fileInputStream)
+                ObjectInputStream objectInputStream =
+                        new ObjectInputStream(fileInputStream)
         ) {
 
-            // Read SaveData object
             SaveData saveData =
                     (SaveData) objectInputStream.readObject();
+
 
             System.out.println("Game Loaded.");
 
             return saveData;
 
-        } catch (IOException | ClassNotFoundException e) {
+        }
 
-            System.out.println("Failed to load save.");
+        catch (IOException | ClassNotFoundException e) {
+
+            System.out.println(
+                    "Failed to load save."
+            );
+
             e.printStackTrace();
 
             return null;
@@ -151,9 +213,12 @@ public class SaveManager {
 
         File saveFile = new File(SAVE_FILE);
 
+
         if (!saveFile.exists()) {
 
-            System.out.println("No save exists.");
+            System.out.println(
+                    "No save exists."
+            );
 
             return;
         }
@@ -161,11 +226,17 @@ public class SaveManager {
 
         if (saveFile.delete()) {
 
-            System.out.println("Save Deleted.");
+            System.out.println(
+                    "Save Deleted."
+            );
 
-        } else {
+        }
 
-            System.out.println("Failed to delete save.");
+        else {
+
+            System.out.println(
+                    "Failed to delete save."
+            );
         }
     }
 }
