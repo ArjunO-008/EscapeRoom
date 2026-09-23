@@ -10,6 +10,7 @@ import javax.swing.Timer;
 import map.MapManager;
 import player.Player;
 import puzzle.PuzzleManager;
+import save.SaveManager;
 import ui.*;
 
 import java.awt.event.MouseAdapter;
@@ -18,6 +19,7 @@ import java.awt.event.MouseEvent;
 public class GamePanel extends JPanel {
 
         private Timer gameTimer;
+        private SaveManager saveManager;
 
         private LoadingScreen loadingScreen;
         private MainMenu mainMenu;
@@ -35,6 +37,18 @@ public class GamePanel extends JPanel {
         public GamePanel() {
                 setPreferredSize(new Dimension(960, 640));
                 setBackground(Color.BLACK);
+
+                System.out.println("========== SAVE TEST ==========");
+
+                System.out.println(
+                                "Save exists before: " + SaveManager.hasSave());
+
+                SaveManager.createNewSave();
+
+                System.out.println(
+                                "Save exists after: " + SaveManager.hasSave());
+
+                System.out.println("================================");
 
                 // UI screens
                 loadingScreen = new LoadingScreen();
