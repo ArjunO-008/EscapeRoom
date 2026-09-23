@@ -10,6 +10,7 @@ import javax.swing.Timer;
 import map.MapManager;
 import player.Player;
 import puzzle.PuzzleManager;
+import save.SaveData;
 import save.SaveManager;
 import ui.*;
 
@@ -19,7 +20,6 @@ import java.awt.event.MouseEvent;
 public class GamePanel extends JPanel {
 
         private Timer gameTimer;
-        private SaveManager saveManager;
 
         private LoadingScreen loadingScreen;
         private MainMenu mainMenu;
@@ -40,13 +40,59 @@ public class GamePanel extends JPanel {
 
                 System.out.println("========== SAVE TEST ==========");
 
-                System.out.println(
-                                "Save exists before: " + SaveManager.hasSave());
+                // Create some fake game data
+                int[] inventory = { 1, 3, 5 };
 
-                SaveManager.createNewSave();
+                boolean[] puzzles = {
+                                false,
+                                true,
+                                false,
+                                true
+                };
 
-                System.out.println(
-                                "Save exists after: " + SaveManager.hasSave());
+                SaveData testData = new SaveData(
+                                true, // continuity
+                                352.5f, // player X
+                                184.0f, // player Y
+                                2, // room ID
+                                inventory,
+                                puzzles);
+
+                // Save it
+                SaveManager.save(testData);
+
+                // Load it
+                SaveData loadedData = SaveManager.load();
+
+                // Print loaded data
+                System.out.println("Continuity: "
+                                + loadedData.isContinuity());
+
+                System.out.println("Player X: "
+                                + loadedData.getPlayerX());
+
+                System.out.println("Player Y: "
+                                + loadedData.getPlayerY());
+
+                System.out.println("Room ID: "
+                                + loadedData.getCurrentRoomId());
+
+                System.out.println("Inventory:");
+
+                for (int item : loadedData.getInventory()) {
+                        System.out.println("Item ID: " + item);
+                }
+
+                System.out.println("Puzzles:");
+
+                boolean[] loadedPuzzles = loadedData.getPuzzlesCompleted();
+
+                for (int i = 0; i < loadedPuzzles.length; i++) {
+
+                        System.out.println(
+                                        "Puzzle " + (i + 1)
+                                                        + ": " + loadedPuzzles[i]);
+                }
 
                 System.out.println("================================");
 
