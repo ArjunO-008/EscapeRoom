@@ -10,6 +10,8 @@ import javax.swing.Timer;
 import map.MapManager;
 import player.Player;
 import puzzle.PuzzleManager;
+import save.SaveData;
+import save.SaveManager;
 import ui.*;
 
 import java.awt.event.MouseAdapter;
@@ -36,6 +38,32 @@ public class GamePanel extends JPanel {
                 setPreferredSize(new Dimension(960, 640));
                 setBackground(Color.BLACK);
 
+                // System.out.println("========== NEW GAME TEST ==========");
+
+                // SaveManager.createNewSave();
+
+                // SaveData data = SaveManager.load();
+
+                // System.out.println("Continuity: "
+                //                 + data.isContinuity());
+
+                // System.out.println("Player X: "
+                //                 + data.getPlayerX());
+
+                // System.out.println("Player Y: "
+                //                 + data.getPlayerY());
+
+                // System.out.println("Room ID: "
+                //                 + data.getCurrentRoomId());
+
+                // System.out.println("Inventory size: "
+                //                 + data.getInventory().length);
+
+                // System.out.println("Puzzle 1 solved: "
+                //                 + data.getPuzzlesCompleted()[0]);
+
+                // System.out.println("===================================");
+
                 // UI screens
                 loadingScreen = new LoadingScreen();
                 mainMenu = new MainMenu();
@@ -44,7 +72,8 @@ public class GamePanel extends JPanel {
                 // Use Commands and Use For testing Out each UI Screens.
                 loadingScreen.show();
                 mainMenu.show();
-                winScreen.show();
+                mainMenu.startNewGame();
+                //winScreen.show();
 
                 roomSelector = new RoomSelector();
 
