@@ -2,89 +2,26 @@ package ui;
 
 import java.awt.*;
 
-
 public class RoomSelector {
 
     private boolean visible = false;
     private int currentRoomId;
 
+    private int hoveredRoomId = -1;
+
     public void show(int currentRoomId) {
         this.currentRoomId = currentRoomId;
         this.visible = true;
+        this.hoveredRoomId = -1;
     }
 
     public void hide() {
         visible = false;
+        hoveredRoomId = -1;
     }
 
     public boolean isVisible() {
         return visible;
-    }
-
-    public void handleClick(int mouseX, int mouseY, int width, int height) {
-
-        if (!visible)
-            return;
-
-        int panelHeight = 150;
-        int panelY = height - panelHeight;
-
-        // Cancel
-        if (mouseX >= width / 2 - 60 &&
-                mouseX <= width / 2 + 60 &&
-                mouseY >= panelY + 105 &&
-                mouseY <= panelY + 135) {
-
-            hide();
-            return;
-        }
-
-        int buttonWidth = 150;
-        int buttonHeight = 40;
-        int gap = 20;
-
-        String[] rooms = {
-                "Bedroom",
-                "Kitchen",
-                "Living Room"
-        };
-
-        int[] roomIds = {
-                1,
-                2,
-                3
-        };
-
-        int availableRooms = 0;
-
-        for (int roomId : roomIds) {
-            if (roomId != currentRoomId)
-                availableRooms++;
-        }
-
-        int totalWidth = availableRooms * buttonWidth +
-                (availableRooms - 1) * gap;
-
-        int x = (width - totalWidth) / 2;
-
-        for (int i = 0; i < rooms.length; i++) {
-
-            if (roomIds[i] == currentRoomId)
-                continue;
-
-            if (mouseX >= x &&
-                    mouseX <= x + buttonWidth &&
-                    mouseY >= panelY + 55 &&
-                    mouseY <= panelY + 55 + buttonHeight) {
-
-                System.out.println("Selected: " + rooms[i]);
-
-                hide();
-                return;
-            }
-
-            x += buttonWidth + gap;
-        }
     }
 
     public void draw(Graphics2D g, int width, int height) {
@@ -92,29 +29,55 @@ public class RoomSelector {
         if (!visible)
             return;
 
-        int panelHeight = 150;
+        // =========================
+        // PANEL
+        // =========================
+
+        int panelHeight = (int) (height * 0.18);
         int panelY = height - panelHeight;
 
-        // Background
-        g.setColor(new Color(20, 20, 20, 230));
+        // Wooden border
+        g.setColor(new Color(70, 42, 25));
         g.fillRect(0, panelY, width, panelHeight);
 
-        // Title
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 20));
+        // Beige interior
+        g.setColor(new Color(235, 218, 180));
+        g.fillRect(
+                6,
+                panelY + 6,
+                width - 12,
+                panelHeight - 12
+        );
 
-        String title = "Where to Go?";
-        int titleWidth = g.getFontMetrics().stringWidth(title);
+        // =========================
+        // CONTENT
+        // =========================
+
+        int x = 25;
+        int y = panelY + 25;
+
+        // Title
+        g.setColor(new Color(75, 45, 27));
+
+        g.setFont(
+                new Font(
+                        "Serif",
+                        Font.BOLD,
+                        20
+                )
+        );
 
         g.drawString(
-                title,
-                (width - titleWidth) / 2,
-                panelY + 30);
+                "Where To Go?",
+                x,
+                y
+        );
 
-        // Buttons
-        int buttonWidth = 150;
-        int buttonHeight = 40;
-        int gap = 20;
+        y += 25;
+
+        // =========================
+        // ROOMS
+        // =========================
 
         String[] rooms = {
                 "Bedroom",
@@ -128,61 +91,248 @@ public class RoomSelector {
                 3
         };
 
-        int availableRooms = 0;
+        for (int i = 0; i < rooms.length; i++) {
 
-        for (int roomId : roomIds) {
-            if (roomId != currentRoomId)
-                availableRooms++;
+            if (roomIds[i] == currentRoomId)
+                continue;
+
+            drawOption(
+                    g,
+                    rooms[i],
+                    roomIds[i],
+                    x,
+                    y
+            );
+
+            y += 24;
         }
 
-        int totalWidth = availableRooms * buttonWidth +
-                (availableRooms - 1) * gap;
+        // Cancel
+        drawOption(
+                g,
+                "Cancel",
+                0,
+                x,
+                y
+        );
+    }
 
-        int x = (width - totalWidth) / 2;
+    private void drawOption(
+            Graphics2D g,
+            String text,
+            int id,
+            int x,
+            int y
+    ) {
+
+        boolean hovered = hoveredRoomId == id;
+
+        g.setFont(
+                new Font(
+                        "Serif",
+                        hovered ? Font.BOLD : Font.PLAIN,
+                        17
+                )
+        );
+
+        if (hovered) {
+
+            // Small horizontal movement
+            x += 8;
+
+            g.setColor(
+                    new Color(95, 55, 30)
+            );
+
+            // Pointer-style marker
+            g.drawString(
+                    ">",
+                    x - 14,
+                    y
+            );
+
+        } else {
+
+            g.setColor(
+                    new Color(100, 60, 35)
+            );
+        }
+
+        g.drawString(
+                text,
+                x,
+                y
+        );
+    }
+
+    // =========================
+    // CLICK
+    // =========================
+
+    public void handleClick(
+            int mouseX,
+            int mouseY,
+            int width,
+            int height
+    ) {
+
+        if (!visible)
+            return;
+
+        int panelHeight = (int) (height * 0.15);
+        int panelY = height - panelHeight;
+
+        int x = 25;
+        int y = panelY + 25;
+
+        // Skip title
+        y += 25;
+
+        String[] rooms = {
+                "Bedroom",
+                "Kitchen",
+                "Living Room"
+        };
+
+        int[] roomIds = {
+                1,
+                2,
+                3
+        };
 
         for (int i = 0; i < rooms.length; i++) {
 
             if (roomIds[i] == currentRoomId)
                 continue;
 
-            g.setColor(Color.DARK_GRAY);
-            g.fillRect(
+            if (isInsideOption(
+                    mouseX,
+                    mouseY,
                     x,
-                    panelY + 55,
-                    buttonWidth,
-                    buttonHeight);
+                    y
+            )) {
 
-            g.setColor(Color.WHITE);
-            g.drawRect(
-                    x,
-                    panelY + 55,
-                    buttonWidth,
-                    buttonHeight);
+                System.out.println(
+                        "Selected: " + rooms[i]
+                );
 
-            String text = rooms[i];
+                hide();
+                return;
+            }
 
-            int textWidth = g.getFontMetrics().stringWidth(text);
-
-            g.drawString(
-                    text,
-                    x + (buttonWidth - textWidth) / 2,
-                    panelY + 80);
-
-            x += buttonWidth + gap;
+            y += 24;
         }
 
         // Cancel
-        g.setColor(Color.GRAY);
-        g.fillRect(
-                width / 2 - 60,
-                panelY + 105,
-                120,
-                30);
+        if (isInsideOption(
+                mouseX,
+                mouseY,
+                x,
+                y
+        )) {
 
-        g.setColor(Color.WHITE);
-        g.drawString(
-                "Cancel",
-                width / 2 - 25,
-                panelY + 126);
+            hide();
+        }
+    }
+
+    // =========================
+    // HOVER
+    // =========================
+
+    public void handleMouseMove(
+            int mouseX,
+            int mouseY,
+            int width,
+            int height
+    ) {
+
+        if (!visible)
+            return;
+
+        hoveredRoomId = -1;
+
+        int panelHeight = (int) (height * 0.15);
+        int panelY = height - panelHeight;
+
+        int x = 25;
+        int y = panelY + 25;
+
+        y += 25;
+
+        String[] rooms = {
+                "Bedroom",
+                "Kitchen",
+                "Living Room"
+        };
+
+        int[] roomIds = {
+                1,
+                2,
+                3
+        };
+
+        for (int i = 0; i < rooms.length; i++) {
+
+            if (roomIds[i] == currentRoomId)
+                continue;
+
+            if (isInsideOption(
+                    mouseX,
+                    mouseY,
+                    x,
+                    y
+            )) {
+
+                hoveredRoomId = roomIds[i];
+
+                setHandCursor(true);
+
+                return;
+            }
+
+            y += 24;
+        }
+
+        // Cancel
+        if (isInsideOption(
+                mouseX,
+                mouseY,
+                x,
+                y
+        )) {
+
+            hoveredRoomId = 0;
+
+            setHandCursor(true);
+
+            return;
+        }
+
+        setHandCursor(false);
+    }
+
+    private boolean isInsideOption(
+            int mouseX,
+            int mouseY,
+            int x,
+            int y
+    ) {
+
+        /*
+         * Large invisible hit area.
+         *
+         * The text itself doesn't need
+         * to have a background.
+         */
+
+        return mouseX >= x &&
+               mouseX <= x + 220 &&
+               mouseY >= y - 18 &&
+               mouseY <= y + 5;
+    }
+
+    private void setHandCursor(boolean hand) {
+
+        // Cursor handling is done by GamePanel.
     }
 }

@@ -17,135 +17,155 @@ import java.awt.event.MouseEvent;
 
 public class GamePanel extends JPanel {
 
-    private Timer gameTimer;
+        private Timer gameTimer;
 
-    private LoadingScreen loadingScreen;
-    private MainMenu mainMenu;
-    private WinScreen winScreen;
+        private LoadingScreen loadingScreen;
+        private MainMenu mainMenu;
+        private WinScreen winScreen;
 
-    private RoomSelector roomSelector;
+        private RoomSelector roomSelector;
 
-    private PuzzleManager puzzleManager;
+        private PuzzleManager puzzleManager;
 
-    private Player player;
-    private InputSystem inputSystem;
+        private Player player;
+        private InputSystem inputSystem;
 
-    private MapManager mapManager;
+        private MapManager mapManager;
 
-    public GamePanel() {
-        setPreferredSize(new Dimension(960, 640));
-        setBackground(Color.BLACK);
+        public GamePanel() {
+                setPreferredSize(new Dimension(960, 640));
+                setBackground(Color.BLACK);
 
-        // UI screens
-        loadingScreen = new LoadingScreen();
-        mainMenu = new MainMenu();
-        winScreen = new WinScreen();
+                // UI screens
+                loadingScreen = new LoadingScreen();
+                mainMenu = new MainMenu();
+                winScreen = new WinScreen();
 
-        // Use Commands and Use For testing Out each UI Screens.
-        loadingScreen.show();
-        mainMenu.show();
-        winScreen.show();
+                // Use Commands and Use For testing Out each UI Screens.
+                loadingScreen.show();
+                mainMenu.show();
+                winScreen.show();
 
-        roomSelector = new RoomSelector();
+                roomSelector = new RoomSelector();
 
-        // Puzzle setup
-        puzzleManager = new PuzzleManager();
-        puzzleManager.openPuzzle(1); // .openPuzzle(ID)
+                // Puzzle setup
+                puzzleManager = new PuzzleManager();
+                puzzleManager.openPuzzle(1); // .openPuzzle(ID)
 
-        // Player
-        player = new Player(100, 100);
+                // Player
+                player = new Player(100, 100);
 
-        // Maps
-        mapManager = new MapManager();
-        /*
-         * loadRoom(ID);
-         * ID:
-         * 1 = Bedroom,
-         * 2 = Kitchen,
-         * 3 = Living Room.
-         */
-        loadRoom(1);
+                // Maps
+                mapManager = new MapManager();
+                /*
+                 * loadRoom(ID);
+                 * ID:
+                 * 1 = Bedroom,
+                 * 2 = Kitchen,
+                 * 3 = Living Room.
+                 */
+                loadRoom(1);
 
-        // Test Room Selector
-        //roomSelector.show(1);
+                // Test Room Selector
+                // roomSelector.show(2);
 
-        // Input handling (movement only)
-        inputSystem = new InputSystem(this);
-        setFocusable(true);
+                // Input handling (movement only)
+                inputSystem = new InputSystem(this);
+                setFocusable(true);
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (roomSelector.isVisible()) {
-                    roomSelector.handleClick(e.getX(), e.getY(), getWidth(), getHeight());
-                    repaint();
-                }
-            }
-        });
+                addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mousePressed(MouseEvent e) {
+                                if (roomSelector.isVisible()) {
+                                        roomSelector.handleClick(e.getX(), e.getY(), getWidth(), getHeight());
+                                        repaint();
+                                }
+                        }
+                });
+                addMouseMotionListener(new MouseAdapter() {
 
-        // Game loop (~60 FPS)
-        gameTimer = new Timer(16, e -> {
-            update();
-            repaint();
-        });
-        gameTimer.start();
-    }
+                        @Override
+                        public void mouseMoved(MouseEvent e) {
 
-    public void loadRoom(int roomId) {
-        String mapName = switch (roomId) {
-            case 1 -> "bedroom";
-            case 2 -> "kitchen";
-            case 3 -> "living_room";
-            default -> throw new IllegalArgumentException("Unknown room ID: " + roomId);
-        };
+                                if (roomSelector.isVisible()) {
 
-        changeMap(mapName, 100, 100);
-    }
+                                        roomSelector.handleMouseMove(
+                                                        e.getX(),
+                                                        e.getY(),
+                                                        getWidth(),
+                                                        getHeight());
 
-    /** Switches the active room and repositions the player. */
-    private void changeMap(String mapName, int playerX, int playerY) {
-        System.out.println("Changing room to: " + mapName);
+                                        repaint();
+                                }
+                        }
+                });
 
-        mapManager.switchMap(mapName);
-        player.setX(playerX);
-        player.setY(playerY);
+                // Game loop (~60 FPS)
+                gameTimer = new Timer(16, e -> {
+                        update();
+                        repaint();
+                });
+                gameTimer.start();
+        }
 
-        repaint();
-    }
+        public void loadRoom(int roomId) {
+                String mapName = switch (roomId) {
+                        case 1 -> "bedroom";
+                        case 2 -> "kitchen";
+                        case 3 -> "living_room";
+                        default -> throw new IllegalArgumentException("Unknown room ID: " + roomId);
+                };
 
-    /** Per-frame update: reads input and moves the player. */
-    private void update() {
-        final int speed = 4;
+                changeMap(mapName, 100, 100);
+        }
 
-        int dx = 0;
-        int dy = 0;
+        /** Switches the active room and repositions the player. */
+        private void changeMap(String mapName, int playerX, int playerY) {
+                System.out.println("Changing room to: " + mapName);
 
-        if (inputSystem.isUp())
-            dy -= speed;
-        if (inputSystem.isDown())
-            dy += speed;
-        if (inputSystem.isLeft())
-            dx -= speed;
-        if (inputSystem.isRight())
-            dx += speed;
+                mapManager.switchMap(mapName);
+                player.setX(playerX);
+                player.setY(playerY);
 
-        player.moveBy(dx, dy, getWidth(), getHeight());
-    }
+                repaint();
+        }
 
-    /** Renders the current room and the player. */
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+        /** Per-frame update: reads input and moves the player. */
+        private void update() {
+                final int speed = 4;
 
-        Graphics2D g2 = (Graphics2D) g.create();
+                int dx = 0;
+                int dy = 0;
 
-        mapManager.draw(g2);
-        roomSelector.draw(g2, getWidth(), getHeight());
+                if (inputSystem.isUp())
+                        dy -= speed;
 
-        g2.setColor(player.getColor());
-        g2.fillRect(player.getX(), player.getY(), player.getWidth(), player.getHeight());
+                if (inputSystem.isDown())
+                        dy += speed;
 
-        g2.dispose();
-    }
+                if (inputSystem.isLeft())
+                        dx -= speed;
+
+                if (inputSystem.isRight())
+                        dx += speed;
+
+                player.moveBy(dx, dy, getWidth(), getHeight());
+
+                player.update();
+        }
+
+        /** Renders the current room and the player. */
+        @Override
+        protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                Graphics2D g2 = (Graphics2D) g.create();
+
+                mapManager.draw(g2);
+                roomSelector.draw(g2, getWidth(), getHeight());
+
+                player.draw(g2);
+                g2.dispose();
+        }
 
 }
