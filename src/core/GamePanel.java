@@ -13,6 +13,13 @@ import puzzle.PuzzleManager;
 import save.SaveData;
 import save.SaveManager;
 import ui.*;
+import interaction.Interactable;
+import interaction.InteractionSystem;
+import interaction.Key;
+import interaction.Door;
+import inventory.InventoryManager;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -33,6 +40,9 @@ public class GamePanel extends JPanel {
         private InputSystem inputSystem;
 
         private MapManager mapManager;
+
+        private InventoryManager inventoryManager;
+        private InteractionSystem interactionSystem;
 
         public GamePanel() {
                 setPreferredSize(new Dimension(960, 640));
@@ -86,6 +96,10 @@ public class GamePanel extends JPanel {
 
                 // Maps
                 mapManager = new MapManager();
+
+                // Inventory + interactable objects (key, door, etc.)
+                inventoryManager = new InventoryManager();
+                interactionSystem = new InteractionSystem();
                 /*
                  * loadRoom(ID);
                  * ID:
@@ -146,7 +160,26 @@ public class GamePanel extends JPanel {
                 };
 
                 changeMap(mapName, 100, 100);
+
+                interactionSystem.setInteractables(getInteractablesForRoom(roomId));
+        }     
+        
+        /**
+         * Defines which interactable objects (keys, doors, puzzle triggers...)
+         * exist in a given room. Positions are placeholders until real map
+         * object data is used - adjust x/y to fit each room's layout.
+         */
+        private List<Interactable> getInteractablesForRoom(int roomId) {
+                List<Interactable> list = new ArrayList<>();
+
+                if (roomId == 1) { // bedroom
+                        list.add(new Key(400, 300, inventoryManager));
+                        list.add(new Door(440,470,inventoryManager));
+                }
+
+                return list;
         }
+
 
         /** Switches the active room and repositions the player. */
         private void changeMap(String mapName, int playerX, int playerY) {
@@ -181,6 +214,13 @@ public class GamePanel extends JPanel {
                 player.moveBy(dx, dy, getWidth(), getHeight());
 
                 player.update();
+
+
+                interactionSystem.update(player);
+
+                if (inputSystem.consumeInteract()) {
+                        interactionSystem.tryInteract();
+                }
         }
 
         /** Renders the current room and the player. */
@@ -193,7 +233,10 @@ public class GamePanel extends JPanel {
                 mapManager.draw(g2);
                 roomSelector.draw(g2, getWidth(), getHeight());
 
+                interactionSystem.drawObjects(g2);
                 player.draw(g2);
+                interactionSystem.drawPrompt(g2, getWidth(), getHeight());
+                
                 g2.dispose();
         }
 

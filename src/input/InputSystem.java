@@ -7,7 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 public class InputSystem {
-    private boolean up, down, left, right;
+    private boolean up, down, left, right, interactHeld, interactPressed;
 
     public InputSystem(JComponent component) {
 
@@ -76,6 +76,25 @@ public class InputSystem {
                 right = false;
             }
         });
+        // INTERACT (E) KEY-PRESS:
+        component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0), "interact-pressed");
+        component.getActionMap().put("interact-pressed", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!interactHeld) {
+                    interactPressed = true;
+                }
+                interactHeld = true;
+            }
+        });
+        // INTERACT (E) KEY-RELEASE:
+        component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0, true), "interact-release");
+        component.getActionMap().put("interact-release", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                interactHeld = false;
+            }
+        });
 
     }
 
@@ -93,6 +112,14 @@ public class InputSystem {
 
     public boolean isRight() {
         return right;
+    }
+
+    public boolean consumeInteract() {
+        if (interactPressed) {
+            interactPressed = false;
+            return true;
+        }
+        return false;
     }
 
 }
