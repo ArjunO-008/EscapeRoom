@@ -16,6 +16,9 @@ public class InteractionSystem {
         interactables = (list != null) ? list : new ArrayList<>();
         nearby = null;
     }
+    public void addInteractable(Interactable obj) {
+        interactables.add(obj);
+    }
 
     public void update(Player player) {
         Rectangle playerBounds = new Rectangle(
