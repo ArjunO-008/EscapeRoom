@@ -33,6 +33,8 @@ public class GamePanel extends JPanel {
         private MainMenu mainMenu;
         private WinScreen winScreen;
 
+        private InfoUI infoUI;
+
         private RoomSelector roomSelector;
 
         private PuzzleManager puzzleManager;
@@ -56,22 +58,22 @@ public class GamePanel extends JPanel {
                 // SaveData data = SaveManager.load();
 
                 // System.out.println("Continuity: "
-                //                 + data.isContinuity());
+                // + data.isContinuity());
 
                 // System.out.println("Player X: "
-                //                 + data.getPlayerX());
+                // + data.getPlayerX());
 
                 // System.out.println("Player Y: "
-                //                 + data.getPlayerY());
+                // + data.getPlayerY());
 
                 // System.out.println("Room ID: "
-                //                 + data.getCurrentRoomId());
+                // + data.getCurrentRoomId());
 
                 // System.out.println("Inventory size: "
-                //                 + data.getInventory().length);
+                // + data.getInventory().length);
 
                 // System.out.println("Puzzle 1 solved: "
-                //                 + data.getPuzzlesCompleted()[0]);
+                // + data.getPuzzlesCompleted()[0]);
 
                 // System.out.println("===================================");
 
@@ -79,12 +81,13 @@ public class GamePanel extends JPanel {
                 loadingScreen = new LoadingScreen();
                 mainMenu = new MainMenu();
                 winScreen = new WinScreen();
+                infoUI = new InfoUI();
 
                 // Use Commands and Use For testing Out each UI Screens.
                 loadingScreen.show();
                 mainMenu.show();
                 mainMenu.startNewGame();
-                //winScreen.show();
+                // winScreen.show();
 
                 roomSelector = new RoomSelector();
 
@@ -94,7 +97,7 @@ public class GamePanel extends JPanel {
 
                 // Puzzle setup
                 puzzleManager = new PuzzleManager();
-                //puzzleManager.openPuzzle(1); // .openPuzzle(ID)
+                // puzzleManager.openPuzzle(1); // .openPuzzle(ID)
 
                 // Player
                 player = new Player(100, 100);
@@ -102,7 +105,6 @@ public class GamePanel extends JPanel {
                 // Maps
                 mapManager = new MapManager();
 
-                
                 /*
                  * loadRoom(ID);
                  * ID:
@@ -110,7 +112,8 @@ public class GamePanel extends JPanel {
                  * 2 = Kitchen,
                  * 3 = Living Room.
                  */
-                loadRoom(1);
+                loadRoom(2);
+                infoUI.show("Puzzle 2 completed.");
 
                 // Test Room Selector
                 // roomSelector.show(2);
@@ -165,8 +168,8 @@ public class GamePanel extends JPanel {
                 changeMap(mapName, 100, 100);
 
                 interactionSystem.setInteractables(getInteractablesForRoom(roomId));
-        }     
-        
+        }
+
         /**
          * Defines which interactable objects (keys, doors, puzzle triggers...)
          * exist in a given room. Positions are placeholders until real map
@@ -176,14 +179,14 @@ public class GamePanel extends JPanel {
                 List<Interactable> list = new ArrayList<>();
 
                 if (roomId == 1) { // bedroom
-                         list.add(new SymbolLock(400, 370, 2, puzzleManager, interactionSystem,630, 330, "A note on the table reads: 4719"));
+                        list.add(new SymbolLock(400, 370, 2, puzzleManager, interactionSystem, 630, 330,
+                                        "A note on the table reads: 4719"));
                         list.add(new Safe(450, 300, 1, puzzleManager, inventoryManager, interactionSystem));
                         list.add(new Door(430, 450, inventoryManager));
                 }
 
                 return list;
         }
-
 
         /** Switches the active room and repositions the player. */
         private void changeMap(String mapName, int playerX, int playerY) {
@@ -198,6 +201,7 @@ public class GamePanel extends JPanel {
 
         /** Per-frame update: reads input and moves the player. */
         private void update() {
+
                 final int speed = 4;
 
                 int dx = 0;
@@ -219,12 +223,13 @@ public class GamePanel extends JPanel {
 
                 player.update();
 
-
                 interactionSystem.update(player);
 
                 if (inputSystem.consumeInteract()) {
                         interactionSystem.tryInteract();
                 }
+
+                infoUI.update();
         }
 
         /** Renders the current room and the player. */
@@ -239,8 +244,16 @@ public class GamePanel extends JPanel {
 
                 interactionSystem.drawObjects(g2);
                 player.draw(g2);
-                interactionSystem.drawPrompt(g2, getWidth(), getHeight());
-                
+                interactionSystem.drawPrompt(
+                                g2,
+                                getWidth(),
+                                getHeight());
+
+                infoUI.draw(
+                                g2,
+                                getWidth(),
+                                getHeight());
+
                 g2.dispose();
         }
 
