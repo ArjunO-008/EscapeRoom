@@ -1,9 +1,9 @@
 package interaction;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import inventory.InventoryManager;
+import ui.InfoUI;
 
 public class Door implements Interactable {
 
@@ -16,11 +16,17 @@ public class Door implements Interactable {
     private final InventoryManager inventoryManager;
 
     private boolean open = false;
+    private final InfoUI infoUI;
 
-    public Door(int x, int y, InventoryManager inventoryManager) {
+    public Door(
+            int x,
+            int y,
+            InventoryManager inventoryManager,
+            InfoUI infoUI) {
         this.x = x;
         this.y = y;
         this.inventoryManager = inventoryManager;
+        this.infoUI = infoUI;
     }
 
     @Override
@@ -35,15 +41,15 @@ public class Door implements Interactable {
     @Override
     public void interact() {
         if (open) {
-            System.out.println("The door is already open.");
+            infoUI.show("The door is already open.");
             return;
         }
 
         if (inventoryManager.hasItem(Key.ITEM_ID)) {
             open = true;
-            System.out.println("The door unlocks... You escaped!");
+            infoUI.show("The door unlocks... You escaped!");
         } else {
-            System.out.println("The door is locked. You need a key.");
+            infoUI.show("The door is locked. You need a key.");
         }
     }
 
@@ -56,6 +62,6 @@ public class Door implements Interactable {
     public void draw(Graphics2D g) {
         // No visual here on purpose — the map's own door tile is the art.
         // This object only exists to detect proximity + E presses.
-        
+
     }
 }

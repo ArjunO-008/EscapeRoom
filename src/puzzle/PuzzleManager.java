@@ -2,6 +2,7 @@ package puzzle;
 
 import save.SaveData;
 import save.SaveManager;
+import ui.InfoUI;
 
 public class PuzzleManager {
 
@@ -14,19 +15,17 @@ public class PuzzleManager {
     // etc.
     private boolean[] solvedPuzzles;
 
+    private final InfoUI infoUI;
 
-    public PuzzleManager() {
+    public PuzzleManager(InfoUI infoUI) {
+        this.infoUI = infoUI;
 
         puzzle1 = new Puzzle1(this);
         puzzle2 = new Puzzle2(this);
 
-        // Currently we have only 2 puzzles.
         solvedPuzzles = new boolean[2];
-
-        // Try to load previous puzzle state
         loadPuzzleState();
     }
-
 
     // --------------------------------------------------
     // Open a puzzle
@@ -37,13 +36,10 @@ public class PuzzleManager {
         // First check whether the puzzle is already solved
         if (isPuzzleSolved(puzzleId)) {
 
-            System.out.println(
-                "Puzzle " + puzzleId + " is already solved."
-            );
+            infoUI.show("Puzzle " + puzzleId + " completed.");
 
             return;
         }
-
 
         switch (puzzleId) {
 
@@ -59,7 +55,6 @@ public class PuzzleManager {
                 break;
         }
     }
-
 
     // --------------------------------------------------
     // Check whether a puzzle is solved
@@ -88,26 +83,19 @@ public class PuzzleManager {
 
         // Invalid puzzle ID
         if (index < 0 || index >= solvedPuzzles.length) {
-            System.out.println(
-                "Cannot complete unknown puzzle: " + puzzleId
-            );
+          infoUI.show("Puzzle " + puzzleId + " completed.");
 
             return;
         }
 
-
         // Mark puzzle as solved
         solvedPuzzles[index] = true;
 
-        System.out.println(
-            "Puzzle " + puzzleId + " completed."
-        );
-
+        infoUI.show("Puzzle " + puzzleId + " completed.");
 
         // Save the updated puzzle state
         savePuzzleState();
     }
-
 
     // --------------------------------------------------
     // Save puzzle state
@@ -122,12 +110,10 @@ public class PuzzleManager {
         if (saveData == null) {
 
             System.out.println(
-                "Cannot save puzzle state: no save exists."
-            );
+                    "Cannot save puzzle state: no save exists.");
 
             return;
         }
-
 
         // Update puzzle state
         saveData.setPuzzlesCompleted(solvedPuzzles);
@@ -135,7 +121,6 @@ public class PuzzleManager {
         // Save everything again
         SaveManager.save(saveData);
     }
-
 
     // --------------------------------------------------
     // Load puzzle state
@@ -150,10 +135,7 @@ public class PuzzleManager {
             return;
         }
 
-
-        boolean[] savedPuzzles =
-                saveData.getPuzzlesCompleted();
-
+        boolean[] savedPuzzles = saveData.getPuzzlesCompleted();
 
         // Make sure the saved data fits
         // the number of puzzles currently in the game.
@@ -161,13 +143,10 @@ public class PuzzleManager {
             return;
         }
 
-
         // Copy the saved puzzle states
         int count = Math.min(
-            solvedPuzzles.length,
-            savedPuzzles.length
-        );
-
+                solvedPuzzles.length,
+                savedPuzzles.length);
 
         for (int i = 0; i < count; i++) {
 

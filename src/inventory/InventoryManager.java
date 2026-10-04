@@ -3,12 +3,21 @@ package inventory;
 import java.util.HashSet;
 import java.util.Set;
 
+import ui.InfoUI;
+
 public class InventoryManager {
-    private Set<Integer> items = new HashSet<>();
+
+    private final Set<Integer> items = new HashSet<>();
+    private final InfoUI infoUI;
+
+    public InventoryManager(InfoUI infoUI) {
+        this.infoUI = infoUI;
+    }
 
     public void addItem(int itemId) {
         items.add(itemId);
-        System.out.println("Inventory: added item " + itemId);
+
+        infoUI.show("Inventory: added item " + itemId);
     }
 
     public boolean hasItem(int itemId) {

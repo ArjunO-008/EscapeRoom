@@ -8,6 +8,7 @@ import java.io.File;
 import javax.imageio.ImageIO;
 import inventory.InventoryManager;
 import puzzle.PuzzleManager;
+import ui.InfoUI;
 
 /**
  * The safe sitting in the world. Doesn't hold any code-checking logic itself -
@@ -31,13 +32,16 @@ public class Safe implements Interactable {
     private boolean keyDropped = false;
     private BufferedImage sprite;
 
+    private final InfoUI infoUI;
+
     public Safe(
             int x,
             int y,
             int puzzleId,
             PuzzleManager puzzleManager,
             InventoryManager inventoryManager,
-            InteractionSystem interactionSystem) {
+            InteractionSystem interactionSystem,
+            InfoUI infoUI) {
 
         this.x = x;
         this.y = y;
@@ -45,6 +49,7 @@ public class Safe implements Interactable {
         this.puzzleManager = puzzleManager;
         this.inventoryManager = inventoryManager;
         this.interactionSystem = interactionSystem;
+        this.infoUI = infoUI;
 
         sprite = loadSprite();
     }
@@ -79,7 +84,11 @@ public class Safe implements Interactable {
         // not every time someone presses E on an already-solved safe.
         if (!wasSolvedBefore && isSolvedNow && !keyDropped) {
             interactionSystem.addInteractable(
-                    new Key(x + WIDTH + 10, y, inventoryManager));
+                    new Key(
+                            x + WIDTH + 10,
+                            y,
+                            inventoryManager,
+                            infoUI));
             keyDropped = true;
         }
     }
