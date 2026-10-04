@@ -92,11 +92,11 @@ public class GamePanel extends JPanel {
                 roomSelector = new RoomSelector();
 
                 // Inventory + interactable objects (key, door, etc.)
-                inventoryManager = new InventoryManager();
+                inventoryManager = new InventoryManager(infoUI);
                 interactionSystem = new InteractionSystem();
 
                 // Puzzle setup
-                puzzleManager = new PuzzleManager();
+                puzzleManager = new PuzzleManager(infoUI);
                 // puzzleManager.openPuzzle(1); // .openPuzzle(ID)
 
                 // Player
@@ -112,7 +112,7 @@ public class GamePanel extends JPanel {
                  * 2 = Kitchen,
                  * 3 = Living Room.
                  */
-                loadRoom(2);
+                loadRoom(1);
                 infoUI.show("Puzzle 2 completed.");
 
                 // Test Room Selector
@@ -181,8 +181,19 @@ public class GamePanel extends JPanel {
                 if (roomId == 1) { // bedroom
                         list.add(new SymbolLock(400, 370, 2, puzzleManager, interactionSystem, 630, 330,
                                         "A note on the table reads: 4719"));
-                        list.add(new Safe(450, 300, 1, puzzleManager, inventoryManager, interactionSystem));
-                        list.add(new Door(430, 450, inventoryManager));
+                        list.add(new Safe(
+                                        450,
+                                        300,
+                                        1,
+                                        puzzleManager,
+                                        inventoryManager,
+                                        interactionSystem,
+                                        infoUI));
+                        list.add(new Door(
+                                        430,
+                                        450,
+                                        inventoryManager,
+                                        infoUI));
                 }
 
                 return list;

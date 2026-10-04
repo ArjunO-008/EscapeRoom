@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
 import inventory.InventoryManager;
+import ui.InfoUI;
 
 public class Key implements Interactable {
     public static final int ITEM_ID = 1;
@@ -21,20 +22,28 @@ public class Key implements Interactable {
     private boolean collected = false;
     private BufferedImage sprite;
 
-    public Key(int x, int y, InventoryManager inventoryManager) {
+    private final InfoUI infoUI;
+
+    public Key(
+            int x,
+            int y,
+            InventoryManager inventoryManager,
+            InfoUI infoUI) {
         this.x = x;
         this.y = y;
         this.inventoryManager = inventoryManager;
+        this.infoUI = infoUI;
+
         sprite = loadSprite();
     }
+
     private BufferedImage loadSprite() {
-    try {
-        return ImageIO.read(new File("src/map/resources/Key.png"));
-    } 
-    catch (Exception e) {
-        System.out.println("Failed to load key sprite, using placeholder.");
-        return null;
-    }
+        try {
+            return ImageIO.read(new File("src/map/resources/Key.png"));
+        } catch (Exception e) {
+            System.out.println("Failed to load key sprite, using placeholder.");
+            return null;
+        }
     }
 
     @Override
@@ -55,7 +64,7 @@ public class Key implements Interactable {
         inventoryManager.addItem(ITEM_ID);
         collected = true;
 
-        System.out.println("Picked up the key.");
+        infoUI.show("Picked up the key.");
     }
 
     @Override
@@ -65,7 +74,7 @@ public class Key implements Interactable {
 
     @Override
     public void draw(Graphics2D g) {
-         if (sprite != null) {
+        if (sprite != null) {
             g.drawImage(sprite, x, y, SIZE, SIZE, null);
         } else {
             g.setColor(Color.YELLOW);
@@ -75,5 +84,4 @@ public class Key implements Interactable {
         }
     }
 
-    
 }
