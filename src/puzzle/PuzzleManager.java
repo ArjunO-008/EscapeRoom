@@ -6,6 +6,7 @@ import save.SaveManager;
 public class PuzzleManager {
 
     private Puzzle1 puzzle1;
+    private Puzzle2 puzzle2;
 
     // Stores whether each puzzle has been completed.
     // Index 0 = Puzzle 1
@@ -17,9 +18,10 @@ public class PuzzleManager {
     public PuzzleManager() {
 
         puzzle1 = new Puzzle1(this);
+        puzzle2 = new Puzzle2(this);
 
-        // Currently we have only 1 puzzle.
-        solvedPuzzles = new boolean[1];
+        // Currently we have only 2 puzzles.
+        solvedPuzzles = new boolean[2];
 
         // Try to load previous puzzle state
         loadPuzzleState();
@@ -47,6 +49,9 @@ public class PuzzleManager {
 
             case 1:
                 puzzle1.show();
+                break;
+            case 2:
+                puzzle2.show();
                 break;
 
             default:

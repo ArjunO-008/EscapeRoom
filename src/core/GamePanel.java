@@ -15,8 +15,9 @@ import save.SaveManager;
 import ui.*;
 import interaction.Interactable;
 import interaction.InteractionSystem;
-import interaction.Key;
 import interaction.Door;
+import interaction.Safe;
+import interaction.SymbolLock;
 import inventory.InventoryManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,9 +88,13 @@ public class GamePanel extends JPanel {
 
                 roomSelector = new RoomSelector();
 
+                // Inventory + interactable objects (key, door, etc.)
+                inventoryManager = new InventoryManager();
+                interactionSystem = new InteractionSystem();
+
                 // Puzzle setup
                 puzzleManager = new PuzzleManager();
-                puzzleManager.openPuzzle(1); // .openPuzzle(ID)
+                //puzzleManager.openPuzzle(1); // .openPuzzle(ID)
 
                 // Player
                 player = new Player(100, 100);
@@ -97,9 +102,7 @@ public class GamePanel extends JPanel {
                 // Maps
                 mapManager = new MapManager();
 
-                // Inventory + interactable objects (key, door, etc.)
-                inventoryManager = new InventoryManager();
-                interactionSystem = new InteractionSystem();
+                
                 /*
                  * loadRoom(ID);
                  * ID:
@@ -173,8 +176,9 @@ public class GamePanel extends JPanel {
                 List<Interactable> list = new ArrayList<>();
 
                 if (roomId == 1) { // bedroom
-                        list.add(new Key(400, 300, inventoryManager));
-                        list.add(new Door(440,470,inventoryManager));
+                         list.add(new SymbolLock(400, 370, 2, puzzleManager, interactionSystem,630, 330, "A note on the table reads: 4719"));
+                        list.add(new Safe(450, 300, 1, puzzleManager, inventoryManager, interactionSystem));
+                        list.add(new Door(430, 450, inventoryManager));
                 }
 
                 return list;
