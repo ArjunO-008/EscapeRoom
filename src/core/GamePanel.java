@@ -10,8 +10,6 @@ import javax.swing.Timer;
 import map.MapManager;
 import player.Player;
 import puzzle.PuzzleManager;
-import save.SaveData;
-import save.SaveManager;
 import ui.*;
 import interaction.Interactable;
 import interaction.InteractionSystem;
@@ -38,6 +36,7 @@ public class GamePanel extends JPanel {
         private RoomSelector roomSelector;
 
         private PuzzleManager puzzleManager;
+        private InventoryUI inventoryUI;
 
         private Player player;
         private InputSystem inputSystem;
@@ -94,6 +93,7 @@ public class GamePanel extends JPanel {
                 // Inventory + interactable objects (key, door, etc.)
                 inventoryManager = new InventoryManager(infoUI);
                 interactionSystem = new InteractionSystem();
+                inventoryUI = new InventoryUI(inventoryManager);
 
                 // Puzzle setup
                 puzzleManager = new PuzzleManager(infoUI);
@@ -263,6 +263,9 @@ public class GamePanel extends JPanel {
                 infoUI.draw(
                                 g2,
                                 getWidth(),
+                                getHeight());
+                inventoryUI.draw(
+                                g2,
                                 getHeight());
 
                 g2.dispose();
