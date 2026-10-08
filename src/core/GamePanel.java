@@ -201,6 +201,14 @@ public class GamePanel extends JPanel {
                                         }
                                 )
                         );
+                        list.add(
+                                new Door(
+                                        430,
+                                        450,
+                                        inventoryManager,
+                                        infoUI
+                                )
+                        );
                 }
 
                 if (roomId == 1) {
@@ -229,23 +237,38 @@ public class GamePanel extends JPanel {
                                         infoUI
                                 )
                         );
-
                         list.add(
-                                new Door(
-                                        430,
-                                        450,
-                                        inventoryManager,
-                                        infoUI
+                                new RoomDoor(
+                                        401,
+                                        490,
+                                        110,
+                                        65,
+                                        30,
+                                        () -> {
+
+                                                loadRoom(3);
+
+                                        }
                                 )
                         );
                 }
 
-
                 if (roomId == 2) {
 
-                        /*
-                        * We will add kitchen-specific interactions later.
-                        */
+                        list.add(
+                                new RoomDoor(
+                                        609,
+                                        381,
+                                        38,
+                                        95,
+                                        30,
+                                        () -> {
+
+                                                loadRoom(3);
+
+                                        }
+                                )
+                        );
                 }
 
                 return list;
