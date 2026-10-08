@@ -111,7 +111,7 @@ public class GamePanel extends JPanel {
                  * 2 = Kitchen,
                  * 3 = Living Room.
                  */
-                loadRoom(3);
+                loadRoom(1);
                 infoUI.show("Puzzle 2 completed.");
 
                 // Test Room Selector

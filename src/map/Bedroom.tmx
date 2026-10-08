@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="776">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="795">
  <tileset firstgid="1" name="TopDownHouse_FurnitureState1" tilewidth="32" tileheight="32" tilecount="54" columns="6" objectalignment="bottom">
   <image source="resources/Top-Down_Retro_Interior/TopDownHouse_FurnitureState1.png" width="208" height="288"/>
  </tileset>
@@ -54,6 +54,7 @@
 193,193,193,193,193,193,193,193,193,193,193,177,177,193,193,193,193,193,193,193,193,177,177,177,193,193,193,194,195,196
 </data>
  </layer>
+ <objectgroup id="4" name="1"/>
  <objectgroup id="3" name="Object Layer 1">
   <object id="585" gid="1859" x="219.639" y="281.607" width="21.3033" height="21.3033"/>
   <object id="586" gid="1860" x="240.729" y="281.82" width="21.3033" height="21.3033"/>
@@ -154,7 +155,6 @@
   <object id="694" gid="1883" x="608.012" y="367.442" width="34.1075" height="34.1075"/>
   <object id="695" gid="1884" x="641.893" y="367.215" width="34.1075" height="34.1075"/>
   <object id="696" gid="1897" x="573.905" y="401.777" width="34.1075" height="34.1075"/>
-  <object id="697" gid="1898" x="607.785" y="401.322" width="34.1075" height="34.1075"/>
   <object id="698" gid="1899" x="641.893" y="401.322" width="34.1075" height="34.1075"/>
   <object id="699" gid="1913" x="607.785" y="435.43" width="34.1075" height="34.1075"/>
   <object id="700" gid="1914" x="641.893" y="435.43" width="34.1075" height="34.1075"/>
@@ -216,5 +216,14 @@
   <object id="773" gid="2037" x="444.913" y="533.993" width="22.104" height="22.104"/>
   <object id="774" gid="2038" x="467.017" y="533.894" width="22.104" height="22.104"/>
   <object id="775" gid="2039" x="488.826" y="534.091" width="22.104" height="22.104"/>
+  <object id="794" gid="1898" x="607.905" y="401.488" width="34.1075" height="34.1075"/>
+ </objectgroup>
+ <objectgroup id="6" name="Collision">
+  <object id="788" x="223.773" y="258.834" width="30" height="56.0303"/>
+  <object id="789" x="257.167" y="255.167" width="75" height="135.333"/>
+  <object id="790" x="239.318" y="420.439" width="100.758" height="54.6667"/>
+  <object id="791" x="447.167" y="177.5" width="92.3333" height="136.333"/>
+  <object id="792" x="561.833" y="205.5" width="64.6667" height="105"/>
+  <object id="793" x="586.46" y="315.349" width="90" height="90.6667"/>
  </objectgroup>
 </map>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="431">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="447">
  <tileset firstgid="1" name="TopDownHouse_FloorsAndWalls" tilewidth="30" tileheight="30" tilecount="4" columns="4">
   <image source="resources/Top-Down_Retro_Interior/TopDownHouse_FloorsAndWalls_OpenDoors.png" width="128" height="48"/>
  </tileset>
@@ -313,19 +313,17 @@
   <object id="416" gid="2348" x="515.913" y="272.25" width="46.6767" height="46.6767"/>
  </objectgroup>
  <objectgroup id="4" name="Collision">
-  <object id="417" x="292.667" y="340.333"/>
-  <object id="418" x="312.667" y="340.333"/>
-  <object id="419" x="332.667" y="340.333"/>
-  <object id="420" x="352.667" y="340.333"/>
-  <object id="421" x="373" y="340"/>
-  <object id="422" x="393.333" y="340.667"/>
-  <object id="423" x="406.667" y="341.333"/>
-  <object id="424" x="401" y="331.667"/>
-  <object id="425" x="380.333" y="331.667"/>
-  <object id="426" x="360" y="330.667"/>
-  <object id="427" x="347.333" y="331.333"/>
-  <object id="428" x="296" y="331"/>
-  <object id="429" x="316" y="330.667"/>
-  <object id="430" x="319" y="330.667"/>
+  <object id="433" x="286.97" y="322" width="40.7879" height="28.0606"/>
+  <object id="434" x="339.273" y="322.545" width="71.8182" height="28.3636"/>
+  <object id="436" x="320.156" y="333.871" width="26.3636" height="15.8182" rotation="359.78"/>
+  <object id="438" x="402.727" y="331.818" width="14.3636" height="18.1818"/>
+  <object id="439" x="282.636" y="333.273" width="13.4545" height="17.0909"/>
+  <object id="440" x="254.909" y="346" width="22" height="53.0909"/>
+  <object id="441" x="277.273" y="382" width="141.818" height="26.9091"/>
+  <object id="442" x="420.545" y="388" width="17.6364" height="21.4545"/>
+  <object id="443" x="262.545" y="395.273" width="9.45455" height="19.0909"/>
+  <object id="444" x="599.455" y="305.455" width="30.7273" height="48.3636"/>
+  <object id="445" x="602.364" y="354.182" width="26.1818" height="41.6364"/>
+  <object id="446" x="580" y="317.818" width="17.0909" height="24.5455"/>
  </objectgroup>
 </map>
