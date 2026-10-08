@@ -23,6 +23,7 @@ import player.Player;
 import puzzle.PuzzleManager;
 import ui.*;
 
+
 public class GamePanel extends JPanel {
 
         private Timer gameTimer;
@@ -45,6 +46,8 @@ public class GamePanel extends JPanel {
 
         private InventoryManager inventoryManager;
         private InteractionSystem interactionSystem;
+
+        private GameState gameState;
 
         public GamePanel() {
                 setPreferredSize(new Dimension(960, 640));
@@ -82,11 +85,7 @@ public class GamePanel extends JPanel {
                 winScreen = new WinScreen();
                 infoUI = new InfoUI();
 
-                // Use Commands and Use For testing Out each UI Screens.
-                loadingScreen.show();
-                mainMenu.show();
-                mainMenu.startNewGame();
-                // winScreen.show();
+                gameState = GameState.MENU;
 
                 roomSelector = new RoomSelector();
 
@@ -112,7 +111,7 @@ public class GamePanel extends JPanel {
                  * 2 = Kitchen,
                  * 3 = Living Room.
                  */
-                loadRoom(3);
+
                 infoUI.show("Puzzle 2 completed.");
 
                 // Test Room Selector
@@ -155,6 +154,25 @@ public class GamePanel extends JPanel {
                         repaint();
                 });
                 gameTimer.start();
+        }
+
+        private void startGame() {
+
+                System.out.println("Starting new game...");
+
+                gameState = GameState.LOADING;
+
+                loadingScreen.show();
+
+                /*
+                * Start the new game.
+                */
+                mainMenu.startNewGame();
+
+                /*
+                * Start in the Living Room.
+                */
+                loadRoom(3);
         }
 
         public void loadRoom(int roomId) {
@@ -299,6 +317,38 @@ public class GamePanel extends JPanel {
         /** Per-frame update: reads input and moves the player. */
         private void update() {
 
+                switch (gameState) {
+
+                        case MENU:
+
+                                updateMenu();
+
+                                break;
+
+                        case LOADING:
+
+                                updateLoading();
+
+                                break;
+
+                        case PLAYING:
+
+                                updateGame();
+
+                                break;
+
+                        case WIN:
+
+                                updateWin();
+
+                                break;
+                }
+
+                infoUI.update();
+        }
+        
+        private void updateGame() {
+
                 final int speed = 4;
 
                 int dx = 0;
@@ -338,30 +388,83 @@ public class GamePanel extends JPanel {
         /** Renders the current room and the player. */
         @Override
         protected void paintComponent(Graphics g) {
+
                 super.paintComponent(g);
 
-                Graphics2D g2 = (Graphics2D) g.create();
+                Graphics2D g2 =
+                        (Graphics2D) g.create();
+
+                switch (gameState) {
+
+                        case MENU:
+
+                                mainMenu.draw(
+                                        g2,
+                                        getWidth(),
+                                        getHeight()
+                                );
+
+                                break;
+
+                        case LOADING:
+
+                                loadingScreen.draw(
+                                        g2,
+                                        getWidth(),
+                                        getHeight()
+                                );
+
+                                break;
+
+                        case PLAYING:
+
+                                drawGame(g2);
+
+                                break;
+
+                        case WIN:
+
+                                winScreen.draw(
+                                        g2,
+                                        getWidth(),
+                                        getHeight()
+                                );
+
+                                break;
+                }
+
+                g2.dispose();
+        }
+        private void drawGame(Graphics2D g2) {
 
                 mapManager.draw(g2);
 
-                roomSelector.draw(g2, getWidth(), getHeight());
+                roomSelector.draw(
+                        g2,
+                        getWidth(),
+                        getHeight()
+                );
 
                 interactionSystem.drawObjects(g2);
+
                 player.draw(g2);
+
                 interactionSystem.drawPrompt(
-                                g2,
-                                getWidth(),
-                                getHeight());
+                        g2,
+                        getWidth(),
+                        getHeight()
+                );
 
                 infoUI.draw(
-                                g2,
-                                getWidth(),
-                                getHeight());
-                inventoryUI.draw(
-                                g2,
-                                getHeight());
+                        g2,
+                        getWidth(),
+                        getHeight()
+                );
 
-                g2.dispose();
+                inventoryUI.draw(
+                        g2,
+                        getHeight()
+                );
         }
 
 }
