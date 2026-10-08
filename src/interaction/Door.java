@@ -1,8 +1,8 @@
 package interaction;
 
+import inventory.InventoryManager;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import inventory.InventoryManager;
 import ui.InfoUI;
 
 public class Door implements Interactable {
@@ -17,16 +17,19 @@ public class Door implements Interactable {
 
     private boolean open = false;
     private final InfoUI infoUI;
+    private final Runnable onWin;
 
     public Door(
-            int x,
-            int y,
-            InventoryManager inventoryManager,
-            InfoUI infoUI) {
+        int x,
+        int y,
+        InventoryManager inventoryManager,
+        InfoUI infoUI,
+        Runnable onWin) {
         this.x = x;
         this.y = y;
         this.inventoryManager = inventoryManager;
         this.infoUI = infoUI;
+        this.onWin = onWin;
     }
 
     @Override
