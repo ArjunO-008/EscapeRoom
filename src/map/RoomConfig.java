@@ -2,25 +2,13 @@ package map;
 
 import java.awt.Rectangle;
 
-/**
- * Configuration for one room.
- *
- * Contains:
- * - The playable boundary of the room
- * - The player spawn position
- */
 public final class RoomConfig {
 
-    // The actual playable area of the room.
     private final Rectangle bounds;
 
-    // Player spawn position.
     private final int spawnX;
     private final int spawnY;
 
-    /*
-     * Player dimensions from Player.java.
-     */
     private static final int PLAYER_WIDTH = 32;
     private static final int PLAYER_HEIGHT = 48;
 
@@ -28,7 +16,9 @@ public final class RoomConfig {
             int x,
             int y,
             int width,
-            int height
+            int height,
+            int spawnX,
+            int spawnY
     ) {
 
         bounds = new Rectangle(
@@ -37,17 +27,18 @@ public final class RoomConfig {
                 width,
                 height
         );
-        spawnX = x + (width - PLAYER_WIDTH) / 2;
-        spawnY = y + (height - PLAYER_HEIGHT) / 2;
+
+        this.spawnX = spawnX;
+        this.spawnY = spawnY;
     }
 
-        public boolean canMoveTo(
-                java.awt.geom.Rectangle2D playerBounds,
-                int playerX,
-                int playerY,
-                int playerWidth,
-                int playerHeight
-        ) {
+    public boolean canMoveTo(
+            java.awt.geom.Rectangle2D playerBounds,
+            int playerX,
+            int playerY,
+            int playerWidth,
+            int playerHeight
+    ) {
 
         return playerBounds.getMinX() >= bounds.x
                 && playerBounds.getMinY() >= bounds.y
@@ -55,7 +46,7 @@ public final class RoomConfig {
                         <= bounds.x + bounds.width
                 && playerBounds.getMaxY()
                         <= bounds.y + bounds.height;
-        }
+    }
 
     public int getSpawnX() {
         return spawnX;
@@ -69,51 +60,54 @@ public final class RoomConfig {
         return new Rectangle(bounds);
     }
 
-    /**
-     * Room configurations.
-     *
-     * Current Living Room:
-     *
-     * x = 256
-     * y = 128
-     * width = 384
-     * height = 320
-     *
-     * This corresponds to a 12 x 10 tile playable area
-     * using your 32 x 32 Tiled grid.
-     */
     public static RoomConfig forMap(String mapName) {
 
         return switch (mapName) {
 
             case "living_room" ->
                     new RoomConfig(
-                        256,
-                        230,
-                        384,
-                        220
+                            256,
+                            255,
+                            384,
+                            195,
+
+                            /*
+                             * Living room starts at the center.
+                             */
+                            432,
+                            316
                     );
 
-            /*
-             * Temporary values for the other rooms.
-             *
-             * We will replace these after defining their
-             * actual boundaries.
-             */
             case "bedroom" ->
                     new RoomConfig(
-                        218,
-                        250,
-                        465,
-                        235
+                            218,
+                            250,
+                            465,
+                            235,
+
+                            /*
+                             * Bedroom spawn near the bottom entrance.
+                             *
+                             * Adjust these two values after testing.
+                             */
+                            448,
+                            435
                     );
 
             case "kitchen" ->
                     new RoomConfig(
-                        245,
-                        250,
-                        410,
-                        200
+                            255,
+                            275,
+                            390,
+                            170,
+
+                            /*
+                             * Kitchen spawn near its entrance.
+                             *
+                             * Adjust these after testing.
+                             */
+                            600,
+                            380
                     );
 
             default ->
