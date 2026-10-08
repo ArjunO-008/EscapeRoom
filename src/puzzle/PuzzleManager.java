@@ -153,4 +153,9 @@ public class PuzzleManager {
             solvedPuzzles[i] = savedPuzzles[i];
         }
     }
+    public void resetPuzzles() {
+
+        solvedPuzzles = new boolean[2];
+        savePuzzleState();
+    }
 }

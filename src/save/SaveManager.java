@@ -82,7 +82,7 @@ public class SaveManager {
             int[] inventory = new int[0];
 
             boolean[] puzzlesCompleted =
-                    new boolean[1];
+                    new boolean[2];
 
 
             SaveData newGame = new SaveData(

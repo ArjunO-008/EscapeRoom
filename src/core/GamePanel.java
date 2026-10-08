@@ -113,8 +113,6 @@ public class GamePanel extends JPanel {
                  * 3 = Living Room.
                  */
 
-                infoUI.show("Puzzle 2 completed.");
-
                 // Test Room Selector
                 // roomSelector.show(2);
 
@@ -198,10 +196,7 @@ public class GamePanel extends JPanel {
                 loadingScreen.show();
 
                 mainMenu.startNewGame();
-
-                /*
-                * Start in the Living Room.
-                */
+                puzzleManager.resetPuzzles();
                 loadRoom(3);
 
                 gameState = GameState.PLAYING;
