@@ -85,6 +85,8 @@ public class GamePanel extends JPanel {
                 winScreen = new WinScreen();
                 infoUI = new InfoUI();
 
+                roomSelector = new RoomSelector();
+
                 gameState = GameState.MENU;
                 mainMenu.show();
 
@@ -138,8 +140,20 @@ public class GamePanel extends JPanel {
                 addMouseListener(new MouseAdapter() {
                         @Override
                         public void mousePressed(MouseEvent e) {
+
+                                if (gameState != GameState.PLAYING) {
+                                        return;
+                                }
+
                                 if (roomSelector.isVisible()) {
-                                        roomSelector.handleClick(e.getX(), e.getY(), getWidth(), getHeight());
+
+                                        roomSelector.handleClick(
+                                                e.getX(),
+                                                e.getY(),
+                                                getWidth(),
+                                                getHeight()
+                                        );
+
                                         repaint();
                                 }
                         }
@@ -149,13 +163,18 @@ public class GamePanel extends JPanel {
                         @Override
                         public void mouseMoved(MouseEvent e) {
 
+                                if (gameState != GameState.PLAYING) {
+                                        return;
+                                }
+
                                 if (roomSelector.isVisible()) {
 
                                         roomSelector.handleMouseMove(
-                                                        e.getX(),
-                                                        e.getY(),
-                                                        getWidth(),
-                                                        getHeight());
+                                                e.getX(),
+                                                e.getY(),
+                                                getWidth(),
+                                                getHeight()
+                                        );
 
                                         repaint();
                                 }
