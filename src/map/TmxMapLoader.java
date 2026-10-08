@@ -62,21 +62,26 @@ final class TmxMapLoader {
                     mapWidth,
                     mapHeight);
 
-            List<MapObject> objects = loadObjectLayer(map);
+        List<MapObject> objects =
+                loadObjectLayer(map);
 
+        List<CollisionBox> collisionBoxes =
+                loadCollisionLayer(map);
             tilesets.sort(
                     Comparator.comparingInt(
                             Tileset::getFirstGid));
 
-            return new TmxMapData(
-                    mapWidth,
-                    mapHeight,
-                    mapTileWidth,
-                    mapTileHeight,
-                    tileData,
-                    tilesets,
-                    objects,
-                    true);
+        return new TmxMapData(
+                mapWidth,
+                mapHeight,
+                mapTileWidth,
+                mapTileHeight,
+                tileData,
+                tilesets,
+                objects,
+                collisionBoxes,
+                true
+        );
 
         } catch (Exception e) {
 
@@ -289,7 +294,7 @@ final class TmxMapLoader {
     // OBJECT LAYER
     // ============================================================
 
-    private static List<MapObject> loadObjectLayer(Element map) {
+private static List<MapObject> loadObjectLayer(Element map) {
         List<MapObject> objects = new ArrayList<>();
 
         NodeList objectGroups = map.getElementsByTagName("objectgroup");
@@ -343,6 +348,120 @@ final class TmxMapLoader {
 
         return objects;
     }
+    private static List<CollisionBox> loadCollisionLayer(
+        Element map) {
+
+        List<CollisionBox> collisionBoxes =
+                new ArrayList<>();
+
+        NodeList objectGroups =
+                map.getElementsByTagName("objectgroup");
+
+        for (int i = 0;
+                i < objectGroups.getLength();
+                i++) {
+
+                Element objectGroup =
+                        (Element) objectGroups.item(i);
+
+                String groupName =
+                        objectGroup.getAttribute("name");
+
+                /*
+                * Only read the object group named "Collision".
+                */
+                if (!"Collision".equalsIgnoreCase(groupName)) {
+                continue;
+                }
+
+                NodeList objectNodes =
+                        objectGroup.getElementsByTagName("object");
+
+                for (int j = 0;
+                        j < objectNodes.getLength();
+                        j++) {
+
+                Element object =
+                        (Element) objectNodes.item(j);
+
+                /*
+                * We only support rectangular collision objects
+                * for now.
+                */
+                String gidText =
+                        object.getAttribute("gid");
+
+                if (gidText != null
+                        && !gidText.isEmpty()) {
+
+                        /*
+                        * Ignore tile objects in the collision layer.
+                        */
+                        continue;
+                }
+
+                String xText =
+                        object.getAttribute("x");
+
+                String yText =
+                        object.getAttribute("y");
+
+                String widthText =
+                        object.getAttribute("width");
+
+                String heightText =
+                        object.getAttribute("height");
+
+                if (xText.isEmpty()
+                        || yText.isEmpty()
+                        || widthText.isEmpty()
+                        || heightText.isEmpty()) {
+
+                        continue;
+                }
+
+                double x =
+                        Double.parseDouble(xText);
+
+                double y =
+                        Double.parseDouble(yText);
+
+                double width =
+                        Double.parseDouble(widthText);
+
+                double height =
+                        Double.parseDouble(heightText);
+
+                if (width <= 0
+                        || height <= 0) {
+
+                        continue;
+                }
+
+                collisionBoxes.add(
+                        new CollisionBox(
+                                x,
+                                y,
+                                width,
+                                height
+                        )
+                );
+                }
+
+                /*
+                * We found the Collision layer,
+                * so there is no reason to check more layers.
+                */
+                break;
+        }
+
+        System.out.println(
+                "Collision boxes loaded: "
+                        + collisionBoxes.size()
+        );
+
+        return collisionBoxes;
+        }
     // ============================================================
     // XML HELPERS
     // ============================================================

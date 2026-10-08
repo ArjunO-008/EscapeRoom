@@ -27,6 +27,7 @@ public class TileMap {
     private final List<Tileset> tilesets;
     private final List<MapObject> objects;
     private final List<MapObject> orderedObjects;
+    private final List<CollisionBox> collisionBoxes;
 
     private final boolean loadedSuccessfully;
 
@@ -55,10 +56,8 @@ public class TileMap {
 
         this.objects =
                 data.objects;
-
-        /*
-         * Create the sorted object list ONCE.
-         */
+        this.collisionBoxes =
+                data.collisionBoxes;
         this.orderedObjects =
                 new ArrayList<>(this.objects);
 
@@ -111,14 +110,13 @@ public class TileMap {
     List<MapObject> getObjects() {
         return objects;
     }
-
-    /**
-     * Returns the objects already sorted for rendering.
-     *
-     * This list is created and sorted once when the map loads.
-     */
+    
     public List<MapObject> getOrderedObjects() {
         return orderedObjects;
+    }
+
+    public List<CollisionBox> getCollisionBoxes() {
+        return collisionBoxes;
     }
 
     public int getMapWidth() {

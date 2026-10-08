@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import map.RoomConfig;
+import java.awt.geom.Rectangle2D;
 
 public class Player {
 
@@ -12,6 +13,12 @@ public class Player {
 
     private final int width = 32;
     private final int height = 48;
+
+    private final int collisionWidth = 20;
+    private final int collisionHeight = 12;
+
+    private final int collisionOffsetX = 6;
+    private final int collisionOffsetY = 32;
 
     // 0 = Down, 1 = Left, 2 = Right, 3 = Up
     private int direction = 0;
@@ -119,19 +126,17 @@ public class Player {
     }
 
     public void moveBy(
-        int dx,
-        int dy,
-        RoomConfig roomConfig) {
+            int dx,
+            int dy,
+            RoomConfig roomConfig,
+            map.TileMap tileMap
+    ) {
 
-        /*
-        * Remember the old position so we can determine whether
-        * the player actually moved.
-        */
         int oldX = x;
         int oldY = y;
 
         /*
-        * Update facing direction based on input.
+        * Update facing direction.
         */
         if (dx < 0)
             direction = 1;
@@ -142,43 +147,87 @@ public class Player {
         else if (dy > 0)
             direction = 0;
 
-        /*
-        * Try horizontal movement first.
-        */
         int newX = x + dx;
 
-        if (roomConfig.canMoveTo(
+        if (canMoveTo(
                 newX,
                 y,
-                width,
-                height)) {
+                roomConfig,
+                tileMap
+        )) {
 
             x = newX;
         }
 
-        /*
-        * Try vertical movement separately.
-        *
-        * Doing this separately allows the player to slide
-        * along walls instead of getting completely stuck
-        * when moving diagonally into a corner.
-        */
         int newY = y + dy;
 
-        if (roomConfig.canMoveTo(
+        if (canMoveTo(
                 x,
                 newY,
-                width,
-                height)) {
+                roomConfig,
+                tileMap
+        )) {
 
             y = newY;
         }
 
         /*
-        * Only play walking animation when the player
-        * actually changed position.
+        * Animation.
         */
-        moving = x != oldX || y != oldY;
+        moving =
+                x != oldX
+                        || y != oldY;
+    }
+
+    private boolean canMoveTo(
+        int playerX,
+        int playerY,
+        RoomConfig roomConfig,
+        map.TileMap tileMap
+    ) {
+
+        Rectangle2D.Double playerBounds =
+                getCollisionBounds(
+                        playerX,
+                        playerY
+                );
+
+        if (!roomConfig.canMoveTo(
+                playerBounds,
+                playerX,
+                playerY,
+                width,
+                height
+        )) {
+
+            return false;
+        }
+
+        for (map.CollisionBox box :
+                tileMap.getCollisionBoxes()) {
+
+            if (box.getBounds().intersects(
+                    playerBounds
+            )) {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private Rectangle2D.Double getCollisionBounds(
+            int playerX,
+            int playerY
+        ) {
+
+        return new Rectangle2D.Double(
+                playerX + collisionOffsetX,
+                playerY + collisionOffsetY,
+                collisionWidth,
+                collisionHeight
+        );
     }
 
     public int getX() {

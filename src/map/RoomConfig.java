@@ -41,18 +41,21 @@ public final class RoomConfig {
         spawnY = y + (height - PLAYER_HEIGHT) / 2;
     }
 
-    public boolean canMoveTo(
-            int playerX,
-            int playerY,
-            int playerWidth,
-            int playerHeight
-    ) {
+        public boolean canMoveTo(
+                java.awt.geom.Rectangle2D playerBounds,
+                int playerX,
+                int playerY,
+                int playerWidth,
+                int playerHeight
+        ) {
 
-        return playerX >= bounds.x
-                && playerY >= bounds.y
-                && playerX + playerWidth <= bounds.x + bounds.width
-                && playerY + playerHeight <= bounds.y + bounds.height;
-    }
+        return playerBounds.getMinX() >= bounds.x
+                && playerBounds.getMinY() >= bounds.y
+                && playerBounds.getMaxX()
+                        <= bounds.x + bounds.width
+                && playerBounds.getMaxY()
+                        <= bounds.y + bounds.height;
+        }
 
     public int getSpawnX() {
         return spawnX;

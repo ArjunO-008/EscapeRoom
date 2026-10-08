@@ -245,8 +245,7 @@ public class GamePanel extends JPanel {
                 if (inputSystem.isRight())
                         dx += speed;
 
-                player.moveBy(dx,dy,mapManager.getCurrentRoomConfig());
-
+                player.moveBy(dx,dy,mapManager.getCurrentRoomConfig(),mapManager.getCurrentMap());
                 player.update();
 
                 interactionSystem.update(player);
