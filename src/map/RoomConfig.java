@@ -85,10 +85,10 @@ public final class RoomConfig {
 
             case "living_room" ->
                     new RoomConfig(
-                            256,
-                            230,
-                            384,
-                            320
+                        256,
+                        230,
+                        384,
+                        220
                     );
 
             /*
@@ -99,18 +99,18 @@ public final class RoomConfig {
              */
             case "bedroom" ->
                     new RoomConfig(
-                            0,
-                            0,
-                            960,
-                            640
+                        218,
+                        250,
+                        465,
+                        235
                     );
 
             case "kitchen" ->
                     new RoomConfig(
-                            0,
-                            0,
-                            960,
-                            640
+                        245,
+                        250,
+                        410,
+                        200
                     );
 
             default ->
