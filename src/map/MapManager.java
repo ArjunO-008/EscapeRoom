@@ -6,37 +6,62 @@ import java.util.Map;
 
 public class MapManager {
 
-    private final Map<String, TileMap> maps = new LinkedHashMap<>();
+    private final Map<String, TileMap> maps =
+            new LinkedHashMap<>();
+
+    private final Map<String, RoomConfig> roomConfigs =
+            new LinkedHashMap<>();
 
     private String currentMapName;
 
     public MapManager() {
 
         loadMap(
-            "bedroom",
-            "src/map/Bedroom.tmx"
+                "bedroom",
+                "src/map/Bedroom.tmx"
         );
 
         loadMap(
-            "kitchen",
-            "src/map/Kitchen.tmx"
+                "kitchen",
+                "src/map/Kitchen.tmx"
         );
 
         loadMap(
-            "living_room",
-            "src/map/Living_room.tmx"
+                "living_room",
+                "src/map/Living_room.tmx"
         );
-        // Start in living room
+
+        /*
+         * Load room configurations.
+         */
+        roomConfigs.put(
+                "bedroom",
+                RoomConfig.forMap("bedroom")
+        );
+
+        roomConfigs.put(
+                "kitchen",
+                RoomConfig.forMap("kitchen")
+        );
+
+        roomConfigs.put(
+                "living_room",
+                RoomConfig.forMap("living_room")
+        );
+
+        /*
+         * Start in Living Room.
+         */
         currentMapName = "living_room";
 
         System.out.println(
-            "Starting map: " + currentMapName
+                "Starting map: " + currentMapName
         );
     }
 
     private void loadMap(
-        String name,
-        String path
+            String name,
+            String path
     ) {
 
         TileMap map = new TileMap(path);
@@ -44,7 +69,7 @@ public class MapManager {
         maps.put(name, map);
 
         System.out.println(
-            "Map loaded: " + name
+                "Map loaded: " + name
         );
     }
 
@@ -53,7 +78,16 @@ public class MapManager {
         if (!maps.containsKey(name)) {
 
             System.err.println(
-                "Map not found: " + name
+                    "Map not found: " + name
+            );
+
+            return;
+        }
+
+        if (!roomConfigs.containsKey(name)) {
+
+            System.err.println(
+                    "Room configuration not found: " + name
             );
 
             return;
@@ -62,7 +96,7 @@ public class MapManager {
         currentMapName = name;
 
         System.out.println(
-            "Switched to map: " + currentMapName
+                "Switched to map: " + currentMapName
         );
     }
 
@@ -76,11 +110,17 @@ public class MapManager {
         return currentMapName;
     }
 
+    public RoomConfig getCurrentRoomConfig() {
+
+        return roomConfigs.get(currentMapName);
+    }
+
     public void draw(Graphics2D g2) {
 
         TileMap currentMap = getCurrentMap();
 
         if (currentMap != null) {
+
             currentMap.draw(g2);
         }
     }

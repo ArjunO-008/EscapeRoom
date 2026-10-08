@@ -3,6 +3,7 @@ package player;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
+import map.RoomConfig;
 
 public class Player {
 
@@ -118,16 +119,20 @@ public class Player {
     }
 
     public void moveBy(
-            int dx,
-            int dy,
-            int screenWidth,
-            int screenHeight) {
+        int dx,
+        int dy,
+        RoomConfig roomConfig) {
 
-        moving = dx != 0 || dy != 0;
+        /*
+        * Remember the old position so we can determine whether
+        * the player actually moved.
+        */
+        int oldX = x;
+        int oldY = y;
 
-        x += dx;
-        y += dy;
-
+        /*
+        * Update facing direction based on input.
+        */
         if (dx < 0)
             direction = 1;
         else if (dx > 0)
@@ -137,17 +142,43 @@ public class Player {
         else if (dy > 0)
             direction = 0;
 
-        if (x < 0)
-            x = 0;
+        /*
+        * Try horizontal movement first.
+        */
+        int newX = x + dx;
 
-        if (y < 0)
-            y = 0;
+        if (roomConfig.canMoveTo(
+                newX,
+                y,
+                width,
+                height)) {
 
-        if (x + width > screenWidth)
-            x = screenWidth - width;
+            x = newX;
+        }
 
-        if (y + height > screenHeight)
-            y = screenHeight - height;
+        /*
+        * Try vertical movement separately.
+        *
+        * Doing this separately allows the player to slide
+        * along walls instead of getting completely stuck
+        * when moving diagonally into a corner.
+        */
+        int newY = y + dy;
+
+        if (roomConfig.canMoveTo(
+                x,
+                newY,
+                width,
+                height)) {
+
+            y = newY;
+        }
+
+        /*
+        * Only play walking animation when the player
+        * actually changed position.
+        */
+        moving = x != oldX || y != oldY;
     }
 
     public int getX() {

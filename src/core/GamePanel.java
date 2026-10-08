@@ -1,27 +1,26 @@
 package core;
 
 import input.InputSystem;
+import interaction.Door;
+import interaction.Interactable;
+import interaction.InteractionSystem;
+import interaction.Safe;
+import interaction.SymbolLock;
+import inventory.InventoryManager;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import map.MapManager;
 import player.Player;
 import puzzle.PuzzleManager;
 import ui.*;
-import interaction.Interactable;
-import interaction.InteractionSystem;
-import interaction.Door;
-import interaction.Safe;
-import interaction.SymbolLock;
-import inventory.InventoryManager;
-import java.util.ArrayList;
-import java.util.List;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class GamePanel extends JPanel {
 
@@ -100,7 +99,7 @@ public class GamePanel extends JPanel {
                 // puzzleManager.openPuzzle(1); // .openPuzzle(ID)
 
                 // Player
-                player = new Player(100, 100);
+                player = new Player(0, 0);
 
                 // Maps
                 mapManager = new MapManager();
@@ -112,7 +111,7 @@ public class GamePanel extends JPanel {
                  * 2 = Kitchen,
                  * 3 = Living Room.
                  */
-                loadRoom(1);
+                loadRoom(3);
                 infoUI.show("Puzzle 2 completed.");
 
                 // Test Room Selector
@@ -158,17 +157,22 @@ public class GamePanel extends JPanel {
         }
 
         public void loadRoom(int roomId) {
+
                 String mapName = switch (roomId) {
+
                         case 1 -> "bedroom";
                         case 2 -> "kitchen";
                         case 3 -> "living_room";
-                        default -> throw new IllegalArgumentException("Unknown room ID: " + roomId);
+                        default ->
+                                throw new IllegalArgumentException("Unknown room ID: " + roomId);
                 };
 
-                changeMap(mapName, 100, 100);
+                changeMap(mapName);
 
-                interactionSystem.setInteractables(getInteractablesForRoom(roomId));
-        }
+                interactionSystem.setInteractables(
+                        getInteractablesForRoom(roomId)
+                );
+}
 
         /**
          * Defines which interactable objects (keys, doors, puzzle triggers...)
@@ -200,12 +204,23 @@ public class GamePanel extends JPanel {
         }
 
         /** Switches the active room and repositions the player. */
-        private void changeMap(String mapName, int playerX, int playerY) {
+        private void changeMap(String mapName) {
+
                 System.out.println("Changing room to: " + mapName);
 
                 mapManager.switchMap(mapName);
-                player.setX(playerX);
-                player.setY(playerY);
+
+                /*
+                * Get the configuration of the newly loaded room.
+                */
+                map.RoomConfig roomConfig = mapManager.getCurrentRoomConfig();
+
+                /*
+                * Spawn the player at the room's configured spawn point.
+                */
+                player.setX(roomConfig.getSpawnX());
+
+                player.setY(roomConfig.getSpawnY());
 
                 repaint();
         }
@@ -230,7 +245,7 @@ public class GamePanel extends JPanel {
                 if (inputSystem.isRight())
                         dx += speed;
 
-                player.moveBy(dx, dy, getWidth(), getHeight());
+                player.moveBy(dx,dy,mapManager.getCurrentRoomConfig());
 
                 player.update();
 

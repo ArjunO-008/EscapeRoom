@@ -1,8 +1,8 @@
 package map;
 
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -11,7 +11,6 @@ final class MapRenderer {
 
     private MapRenderer() {
     }
-
 
     // ============================================================
     // ENTRY
@@ -30,10 +29,16 @@ final class MapRenderer {
             return;
         }
 
+        /*
+         * Draw normal tile layer.
+         */
         drawTileLayer(map, g2);
+
+        /*
+         * Draw map objects.
+         */
         drawObjects(map, g2);
     }
-
 
     // ============================================================
     // TILE LAYER
@@ -44,40 +49,30 @@ final class MapRenderer {
             Graphics2D g2
     ) {
 
-        int[][] data =
-                map.getTileData();
+        int[][] data = map.getTileData();
 
-        int mapWidth =
-                map.getMapWidth();
+        int mapWidth = map.getMapWidth();
+        int mapHeight = map.getMapHeight();
 
-        int mapHeight =
-                map.getMapHeight();
-
-        int tileWidth =
-                map.getMapTileWidth();
-
-        int tileHeight =
-                map.getMapTileHeight();
-
+        int tileWidth = map.getMapTileWidth();
+        int tileHeight = map.getMapTileHeight();
 
         for (int row = 0;
-             row < mapHeight;
-             row++) {
+                row < mapHeight;
+                row++) {
 
             for (int col = 0;
-                 col < mapWidth;
-                 col++) {
+                    col < mapWidth;
+                    col++) {
 
                 long rawGid =
                         Integer.toUnsignedLong(
                                 data[row][col]
                         );
 
-
                 if (rawGid == 0) {
                     continue;
                 }
-
 
                 drawTile(
                         map,
@@ -91,7 +86,6 @@ final class MapRenderer {
             }
         }
     }
-
 
     // ============================================================
     // TILE
@@ -110,15 +104,12 @@ final class MapRenderer {
         GidFlags flags =
                 GidFlags.parse(rawGid);
 
-
         Tileset tileset =
                 map.findTileset(flags.gid());
-
 
         if (tileset == null) {
             return;
         }
-
 
         TileSource source =
                 TileSource.of(
@@ -126,11 +117,9 @@ final class MapRenderer {
                         flags.gid()
                 );
 
-
         if (source == null) {
             return;
         }
-
 
         /*
          * Normal tile.
@@ -149,8 +138,10 @@ final class MapRenderer {
 
                     source.sourceX(),
                     source.sourceY(),
+
                     source.sourceX()
                             + source.sourceWidth(),
+
                     source.sourceY()
                             + source.sourceHeight(),
 
@@ -160,19 +151,16 @@ final class MapRenderer {
             return;
         }
 
-
         /*
          * Flipped tile.
          */
         AffineTransform old =
                 g2.getTransform();
 
-
         try {
 
             AffineTransform transform =
                     new AffineTransform(old);
-
 
             double centerX =
                     x + width / 2.0;
@@ -180,17 +168,11 @@ final class MapRenderer {
             double centerY =
                     y + height / 2.0;
 
-
             transform.translate(
                     centerX,
                     centerY
             );
 
-
-            /*
-             * Keep the existing tile-layer flip
-             * behavior.
-             */
             if (flags.flipDiagonal()) {
 
                 transform.concatenate(
@@ -205,7 +187,6 @@ final class MapRenderer {
                 );
             }
 
-
             transform.scale(
                     flags.flipHorizontal()
                             ? -1.0
@@ -216,15 +197,12 @@ final class MapRenderer {
                             : 1.0
             );
 
-
             transform.translate(
                     -width / 2.0,
                     -height / 2.0
             );
 
-
             g2.setTransform(transform);
-
 
             g2.drawImage(
                     source.image(),
@@ -236,8 +214,10 @@ final class MapRenderer {
 
                     source.sourceX(),
                     source.sourceY(),
+
                     source.sourceX()
                             + source.sourceWidth(),
+
                     source.sourceY()
                             + source.sourceHeight(),
 
@@ -250,7 +230,6 @@ final class MapRenderer {
         }
     }
 
-
     // ============================================================
     // OBJECT LAYER
     // ============================================================
@@ -261,8 +240,7 @@ final class MapRenderer {
     ) {
 
         List<MapObject> objects =
-                map.getObjects();
-
+                map.getOrderedObjects();
 
         if (objects == null
                 || objects.isEmpty()) {
@@ -270,38 +248,23 @@ final class MapRenderer {
             return;
         }
 
-
         /*
-         * Tiled's top-down object ordering.
+         * IMPORTANT:
          *
-         * Use a copy so we don't mutate the
-         * map's stored object list.
+         * Do NOT sort the objects here.
+         *
+         * TileMap now stores them in the correct
+         * rendering order when the map is loaded.
          */
-        List<MapObject> ordered =
-                new ArrayList<>(objects);
 
-
-        ordered.sort(
-                Comparator
-                        .comparingDouble(
-                                MapObject::getY
-                        )
-                        .thenComparingInt(
-                                MapObject::getId
-                        )
-        );
-
-
-        for (MapObject object : ordered) {
+        for (MapObject object : objects) {
 
             long rawGid =
                     object.getGid();
 
-
             if (rawGid == 0) {
                 continue;
             }
-
 
             drawObject(
                     map,
@@ -311,7 +274,6 @@ final class MapRenderer {
             );
         }
     }
-
 
     // ============================================================
     // TILE OBJECT
@@ -327,15 +289,12 @@ final class MapRenderer {
         GidFlags flags =
                 GidFlags.parse(rawGid);
 
-
         Tileset tileset =
                 map.findTileset(flags.gid());
-
 
         if (tileset == null) {
             return;
         }
-
 
         TileSource source =
                 TileSource.of(
@@ -343,11 +302,9 @@ final class MapRenderer {
                         flags.gid()
                 );
 
-
         if (source == null) {
             return;
         }
-
 
         double width =
                 object.getWidth();
@@ -355,43 +312,22 @@ final class MapRenderer {
         double height =
                 object.getHeight();
 
-
         if (width <= 0.0
                 || height <= 0.0) {
 
             return;
         }
 
-
         /*
          * --------------------------------------------------------
          * ALIGNMENT
          * --------------------------------------------------------
-         *
-         * The object position is the alignment point.
-         *
-         * Example:
-         *
-         * bottomleft:
-         *
-         *     (x,y)
-         *       ┌─────────┐
-         *       │  TILE   │
-         *       └─────────┘
-         *
-         * bottom:
-         *
-         *          (x,y)
-         *            │
-         *       ┌────┴────┐
-         *       │  TILE   │
-         *       └─────────┘
          */
+
         ObjectAlignment alignment =
                 ObjectAlignment.fromTmxValue(
                         tileset.getObjectAlignment()
                 );
-
 
         double[] offset =
                 alignment.offset(
@@ -399,50 +335,33 @@ final class MapRenderer {
                         height
                 );
 
-
-        /*
-         * Center of the displayed image relative
-         * to the object's alignment origin.
-         */
         double centerX =
                 offset[0] + width / 2.0;
 
         double centerY =
                 offset[1] + height / 2.0;
 
-
         AffineTransform old =
                 g2.getTransform();
-
 
         try {
 
             AffineTransform transform =
                     new AffineTransform(old);
 
-
             /*
-             * ----------------------------------------------------
-             * 1. OBJECT ORIGIN
-             * ----------------------------------------------------
+             * Object origin.
              */
             transform.translate(
                     object.getX(),
                     object.getY()
             );
 
-
             /*
-             * ----------------------------------------------------
-             * 2. OBJECT ROTATION
-             * ----------------------------------------------------
-             *
-             * Rotation happens around the object's alignment
-             * point.
+             * Rotation.
              */
             double rotation =
                     object.getRotation();
-
 
             if (rotation != 0.0) {
 
@@ -451,24 +370,16 @@ final class MapRenderer {
                 );
             }
 
-
             /*
-             * ----------------------------------------------------
-             * 3. MOVE TO IMAGE CENTER
-             * ----------------------------------------------------
+             * Move to displayed image center.
              */
             transform.translate(
                     centerX,
                     centerY
             );
 
-
             /*
-             * ----------------------------------------------------
-             * 4. OBJECT FLIPS
-             * ----------------------------------------------------
-             *
-             * Flips happen around the image center.
+             * Flipping.
              */
             transform.scale(
                     flags.flipHorizontal()
@@ -480,62 +391,56 @@ final class MapRenderer {
                             : 1.0
             );
 
-
             /*
-             * ----------------------------------------------------
-             * 5. SOURCE IMAGE
-             * ----------------------------------------------------
+             * IMPORTANT:
              *
-             * Tile source dimensions and object dimensions are
-             * allowed to be different.
+             * We no longer call getSubimage().
+             *
+             * Instead we directly draw the required
+             * source rectangle from the tileset image.
+             *
+             * This avoids creating a new BufferedImage
+             * for every object on every frame.
              */
-            BufferedImage image =
-                    source.image().getSubimage(
-                            source.sourceX(),
-                            source.sourceY(),
-                            source.sourceWidth(),
-                            source.sourceHeight()
-                    );
 
-
-            /*
-             * Source → displayed object size.
-             */
             double scaleX =
                     width / source.sourceWidth();
 
             double scaleY =
                     height / source.sourceHeight();
 
-
             transform.scale(
                     scaleX,
                     scaleY
             );
 
-
-            /*
-             * Put source image center at the transform origin.
-             */
             transform.translate(
                     -source.sourceWidth() / 2.0,
                     -source.sourceHeight() / 2.0
             );
 
-
             g2.setTransform(transform);
 
+            BufferedImage image =
+                    source.image();
 
-            /*
-             * No rounding here.
-             *
-             * All fractional TMX dimensions remain fractional
-             * until Java2D performs the final rasterization.
-             */
             g2.drawImage(
                     image,
+
                     0,
                     0,
+                    source.sourceWidth(),
+                    source.sourceHeight(),
+
+                    source.sourceX(),
+                    source.sourceY(),
+
+                    source.sourceX()
+                            + source.sourceWidth(),
+
+                    source.sourceY()
+                            + source.sourceHeight(),
+
                     null
             );
 
