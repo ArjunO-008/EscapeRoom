@@ -85,8 +85,7 @@ public class GamePanel extends JPanel {
                 winScreen = new WinScreen();
                 infoUI = new InfoUI();
 
-                gameState = GameState.MENU;
-
+                gameState = GameState.PLAYING;
                 roomSelector = new RoomSelector();
 
                 // Inventory + interactable objects (key, door, etc.)
@@ -103,6 +102,7 @@ public class GamePanel extends JPanel {
 
                 // Maps
                 mapManager = new MapManager();
+                loadRoom(3);
 
                 /*
                  * loadRoom(ID);
@@ -264,12 +264,14 @@ public class GamePanel extends JPanel {
                                         }
                                 )
                         );
-                        new Door(
-                                430,
-                                450,
-                                inventoryManager,
-                                infoUI,
-                                this::winGame
+                        list.add(
+                                new Door(
+                                        430,
+                                        450,
+                                        inventoryManager,
+                                        infoUI,
+                                        this::winGame
+                                )
                         );
                 }
 
@@ -406,44 +408,6 @@ public class GamePanel extends JPanel {
 
                 infoUI.update();
                 }
-        
-        private void updateGame() {
-
-                final int speed = 4;
-
-                int dx = 0;
-                int dy = 0;
-
-                if (inputSystem.isUp())
-                        dy -= speed;
-
-                if (inputSystem.isDown())
-                        dy += speed;
-
-                if (inputSystem.isLeft())
-                        dx -= speed;
-
-                if (inputSystem.isRight())
-                        dx += speed;
-
-                player.moveBy(dx,dy,mapManager.getCurrentRoomConfig(),mapManager.getCurrentMap());
-                player.update();
-
-                interactionSystem.update(player);
-
-                if (inputSystem.consumeInteract()) {
-                        interactionSystem.tryInteract();
-                }
-
-                int selectedRoomId =
-                roomSelector.getSelectedRoomId();
-
-                if (selectedRoomId != -1) {
-                        loadRoom(selectedRoomId);
-                }
-
-                infoUI.update();
-        }
 
         /** Renders the current room and the player. */
         @Override
