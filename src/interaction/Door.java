@@ -49,8 +49,12 @@ public class Door implements Interactable {
         }
 
         if (inventoryManager.hasItem(Key.ITEM_ID)) {
+
             open = true;
-            infoUI.show("The door unlocks... You escaped!");
+            infoUI.show(
+                    "The door unlocks... You escaped!"
+            );
+            onWin.run();
         } else {
             infoUI.show("The door is locked. You need a key.");
         }

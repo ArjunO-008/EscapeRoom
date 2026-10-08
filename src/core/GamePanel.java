@@ -555,7 +555,11 @@ public class GamePanel extends JPanel {
 
                                 case WIN:
 
-                                        drawWinFallback(g2);
+                                        winScreen.draw(
+                                                g2,
+                                                getWidth(),
+                                                getHeight()
+                                        );
 
                                         break;
                         }
