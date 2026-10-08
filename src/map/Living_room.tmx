@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="417">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="431">
  <tileset firstgid="1" name="TopDownHouse_FloorsAndWalls" tilewidth="30" tileheight="30" tilecount="4" columns="4">
   <image source="resources/Top-Down_Retro_Interior/TopDownHouse_FloorsAndWalls_OpenDoors.png" width="128" height="48"/>
  </tileset>
@@ -311,5 +311,21 @@
   <object id="414" gid="823" x="489.629" y="530.5" width="20.1602" height="20.1602"/>
   <object id="415" gid="2345" x="515.913" y="225.76" width="46.6767" height="46.6767"/>
   <object id="416" gid="2348" x="515.913" y="272.25" width="46.6767" height="46.6767"/>
+ </objectgroup>
+ <objectgroup id="4" name="Collision">
+  <object id="417" x="292.667" y="340.333"/>
+  <object id="418" x="312.667" y="340.333"/>
+  <object id="419" x="332.667" y="340.333"/>
+  <object id="420" x="352.667" y="340.333"/>
+  <object id="421" x="373" y="340"/>
+  <object id="422" x="393.333" y="340.667"/>
+  <object id="423" x="406.667" y="341.333"/>
+  <object id="424" x="401" y="331.667"/>
+  <object id="425" x="380.333" y="331.667"/>
+  <object id="426" x="360" y="330.667"/>
+  <object id="427" x="347.333" y="331.333"/>
+  <object id="428" x="296" y="331"/>
+  <object id="429" x="316" y="330.667"/>
+  <object id="430" x="319" y="330.667"/>
  </objectgroup>
 </map>

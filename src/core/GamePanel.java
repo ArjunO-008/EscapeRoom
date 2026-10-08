@@ -265,6 +265,15 @@ public class GamePanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
 
                 mapManager.draw(g2);
+
+                g2.setColor(java.awt.Color.RED);
+                for (map.CollisionBox box :
+                        mapManager.getCurrentMap().getCollisionBoxes()) {
+                        g2.draw(
+                                box.getBounds()
+                        );
+                }
+
                 roomSelector.draw(g2, getWidth(), getHeight());
 
                 interactionSystem.drawObjects(g2);
