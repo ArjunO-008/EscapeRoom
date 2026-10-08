@@ -85,8 +85,8 @@ public class GamePanel extends JPanel {
                 winScreen = new WinScreen();
                 infoUI = new InfoUI();
 
-                gameState = GameState.PLAYING;
-                roomSelector = new RoomSelector();
+                gameState = GameState.MENU;
+                mainMenu.show();
 
                 // Inventory + interactable objects (key, door, etc.)
                 inventoryManager = new InventoryManager(infoUI);
@@ -102,7 +102,6 @@ public class GamePanel extends JPanel {
 
                 // Maps
                 mapManager = new MapManager();
-                loadRoom(3);
 
                 /*
                  * loadRoom(ID);
@@ -120,6 +119,7 @@ public class GamePanel extends JPanel {
                 // Input handling (movement only)
                 inputSystem = new InputSystem(this);
                 setFocusable(true);
+                requestFocusInWindow();
 
                 addKeyListener(new java.awt.event.KeyAdapter() {
 
@@ -168,25 +168,6 @@ public class GamePanel extends JPanel {
                         repaint();
                 });
                 gameTimer.start();
-        }
-
-        private void startGame() {
-
-                System.out.println("Starting new game...");
-
-                gameState = GameState.LOADING;
-
-                loadingScreen.show();
-
-                /*
-                * Start the new game.
-                */
-                mainMenu.startNewGame();
-
-                /*
-                * Start in the Living Room.
-                */
-                loadRoom(3);
         }
 
         private void startNewGame() {
@@ -408,49 +389,158 @@ public class GamePanel extends JPanel {
 
                 infoUI.update();
                 }
+        
+        private void drawLoadingFallback(Graphics2D g) {
+
+                g.setColor(
+                        new Color(25, 18, 14)
+                );
+
+                g.fillRect(
+                        0,
+                        0,
+                        getWidth(),
+                        getHeight()
+                );
+
+                g.setColor(
+                        new Color(235, 218, 180)
+                );
+
+                g.setFont(
+                        new java.awt.Font(
+                                "Serif",
+                                java.awt.Font.BOLD,
+                                36
+                        )
+                );
+
+                String text = "LOADING...";
+
+                int textWidth =
+                        g.getFontMetrics()
+                                .stringWidth(text);
+
+                g.drawString(
+                        text,
+                        (getWidth() - textWidth) / 2,
+                        getHeight() / 2
+                );
+        }
+
+        private void drawWinFallback(Graphics2D g) {
+
+                g.setColor(
+                        new Color(25, 18, 14)
+                );
+
+                g.fillRect(
+                        0,
+                        0,
+                        getWidth(),
+                        getHeight()
+                );
+
+                g.setColor(
+                        new Color(235, 218, 180)
+                );
+
+                g.setFont(
+                        new java.awt.Font(
+                                "Serif",
+                                java.awt.Font.BOLD,
+                                50
+                        )
+                );
+
+                String text = "YOU ESCAPED!";
+
+                int textWidth =
+                        g.getFontMetrics()
+                                .stringWidth(text);
+
+                g.drawString(
+                        text,
+                        (getWidth() - textWidth) / 2,
+                        getHeight() / 2
+                );
+        }
 
         /** Renders the current room and the player. */
         @Override
         protected void paintComponent(Graphics g) {
 
-        super.paintComponent(g);
+                super.paintComponent(g);
 
-                Graphics2D g2 =
-                        (Graphics2D) g.create();
+                        Graphics2D g2 =
+                                (Graphics2D) g.create();
 
-                if (gameState == GameState.PLAYING) {
+                        switch (gameState) {
 
-                        mapManager.draw(g2);
+                                case MENU:
 
-                        roomSelector.draw(
-                                g2,
-                                getWidth(),
-                                getHeight()
-                        );
+                                        mainMenu.draw(
+                                                g2,
+                                                getWidth(),
+                                                getHeight()
+                                        );
 
-                        interactionSystem.drawObjects(g2);
+                                        break;
 
-                        player.draw(g2);
+                                case LOADING:
 
-                        interactionSystem.drawPrompt(
-                                g2,
-                                getWidth(),
-                                getHeight()
-                        );
+                                        /*
+                                        * For now LoadingScreen has no
+                                        * graphical draw method.
+                                        *
+                                        * We will add it next.
+                                        */
+                                        drawLoadingFallback(g2);
 
-                        infoUI.draw(
-                                g2,
-                                getWidth(),
-                                getHeight()
-                        );
+                                        break;
 
-                        inventoryUI.draw(
-                                g2,
-                                getHeight()
-                        );
-                }
+                                case PLAYING:
 
-        g2.dispose();
+                                        mapManager.draw(g2);
+
+                                        roomSelector.draw(
+                                                g2,
+                                                getWidth(),
+                                                getHeight()
+                                        );
+
+                                        interactionSystem.drawObjects(
+                                                g2
+                                        );
+
+                                        player.draw(g2);
+
+                                        interactionSystem.drawPrompt(
+                                                g2,
+                                                getWidth(),
+                                                getHeight()
+                                        );
+
+                                        infoUI.draw(
+                                                g2,
+                                                getWidth(),
+                                                getHeight()
+                                        );
+
+                                        inventoryUI.draw(
+                                                g2,
+                                                getHeight()
+                                        );
+
+                                        break;
+
+                                case WIN:
+
+                                        drawWinFallback(g2);
+
+                                        break;
+                        }
+
+                g2.dispose();
         }
-
 }
