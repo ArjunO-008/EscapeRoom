@@ -5,11 +5,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -294,60 +292,158 @@ final class TmxMapLoader {
     // OBJECT LAYER
     // ============================================================
 
-private static List<MapObject> loadObjectLayer(Element map) {
-        List<MapObject> objects = new ArrayList<>();
+        private static List<MapObject> loadObjectLayer(
+                Element map
+        ) {
 
-        NodeList objectGroups = map.getElementsByTagName("objectgroup");
+        List<MapObject> objects =
+                new ArrayList<>();
+
+        NodeList objectGroups =
+                map.getElementsByTagName("objectgroup");
 
         if (objectGroups.getLength() == 0) {
-            System.out.println("No object layer found.");
-            return objects;
+
+                System.out.println(
+                        "No object layer found."
+                );
+
+                return objects;
         }
 
-        Element objectGroup = (Element) objectGroups.item(0);
-        NodeList objectNodes = objectGroup.getElementsByTagName("object");
+        for (int groupIndex = 0;
+                groupIndex < objectGroups.getLength();
+                groupIndex++) {
 
-        for (int i = 0; i < objectNodes.getLength(); i++) {
-            Element object = (Element) objectNodes.item(i);
+                Element objectGroup =
+                        (Element) objectGroups.item(groupIndex);
 
-            String gidText = object.getAttribute("gid");
+                String groupName =
+                        objectGroup.getAttribute("name");
 
-            // Ignore non-tile objects.
-            if (gidText == null || gidText.isEmpty()) {
+
+                if ("Collision".equalsIgnoreCase(groupName)) {
+
                 continue;
-            }
+                }
 
-            long gid = Long.parseUnsignedLong(gidText);
+                NodeList objectNodes =
+                        objectGroup.getElementsByTagName("object");
 
-            int id = Integer.parseInt(object.getAttribute("id"));
 
-            double x = Double.parseDouble(object.getAttribute("x"));
-            double y = Double.parseDouble(object.getAttribute("y"));
+                boolean containsTileObjects = false;
 
-            double width = Double.parseDouble(object.getAttribute("width"));
-            double height = Double.parseDouble(object.getAttribute("height"));
+                for (int i = 0;
+                        i < objectNodes.getLength();
+                        i++) {
 
-            double rotation = 0.0;
+                Element object =
+                        (Element) objectNodes.item(i);
 
-            String rotationText = object.getAttribute("rotation");
+                String gidText =
+                        object.getAttribute("gid");
 
-            if (rotationText != null && !rotationText.isEmpty()) {
-                rotation = Double.parseDouble(rotationText);
-            }
+                if (gidText != null
+                        && !gidText.isEmpty()) {
 
-            objects.add(
-                    new MapObject(
-                            id,
-                            gid,
-                            x,
-                            y,
-                            width,
-                            height,
-                            rotation));
+                        containsTileObjects = true;
+                        break;
+                }
+                }
+
+                if (!containsTileObjects) {
+
+                continue;
+                }
+
+                System.out.println(
+                        "Using visual object layer: "
+                                + groupName
+                );
+
+                for (int i = 0;
+                        i < objectNodes.getLength();
+                        i++) {
+
+                Element object =
+                        (Element) objectNodes.item(i);
+
+                String gidText =
+                        object.getAttribute("gid");
+
+                if (gidText == null
+                        || gidText.isEmpty()) {
+
+                        continue;
+                }
+
+                long gid =
+                        Long.parseUnsignedLong(
+                                gidText
+                        );
+
+                int id =
+                        Integer.parseInt(
+                                object.getAttribute("id")
+                        );
+
+                double x =
+                        Double.parseDouble(
+                                object.getAttribute("x")
+                        );
+
+                double y =
+                        Double.parseDouble(
+                                object.getAttribute("y")
+                        );
+
+                double width =
+                        Double.parseDouble(
+                                object.getAttribute("width")
+                        );
+
+                double height =
+                        Double.parseDouble(
+                                object.getAttribute("height")
+                        );
+
+                double rotation = 0.0;
+
+                String rotationText =
+                        object.getAttribute("rotation");
+
+                if (rotationText != null
+                        && !rotationText.isEmpty()) {
+
+                        rotation =
+                                Double.parseDouble(
+                                        rotationText
+                                );
+                }
+
+                objects.add(
+                        new MapObject(
+                                id,
+                                gid,
+                                x,
+                                y,
+                                width,
+                                height,
+                                rotation
+                        )
+                );
+                }
+
+                break;
         }
+
+        System.out.println(
+                "Visual objects loaded: "
+                        + objects.size()
+        );
 
         return objects;
-    }
+        }
     private static List<CollisionBox> loadCollisionLayer(
         Element map) {
 
@@ -367,9 +463,7 @@ private static List<MapObject> loadObjectLayer(Element map) {
                 String groupName =
                         objectGroup.getAttribute("name");
 
-                /*
-                * Only read the object group named "Collision".
-                */
+  
                 if (!"Collision".equalsIgnoreCase(groupName)) {
                 continue;
                 }
@@ -384,19 +478,12 @@ private static List<MapObject> loadObjectLayer(Element map) {
                 Element object =
                         (Element) objectNodes.item(j);
 
-                /*
-                * We only support rectangular collision objects
-                * for now.
-                */
                 String gidText =
                         object.getAttribute("gid");
 
                 if (gidText != null
                         && !gidText.isEmpty()) {
 
-                        /*
-                        * Ignore tile objects in the collision layer.
-                        */
                         continue;
                 }
 
@@ -448,10 +535,6 @@ private static List<MapObject> loadObjectLayer(Element map) {
                 );
                 }
 
-                /*
-                * We found the Collision layer,
-                * so there is no reason to check more layers.
-                */
                 break;
         }
 

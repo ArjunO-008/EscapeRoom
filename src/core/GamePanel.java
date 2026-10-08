@@ -111,7 +111,7 @@ public class GamePanel extends JPanel {
                  * 2 = Kitchen,
                  * 3 = Living Room.
                  */
-                loadRoom(1);
+                loadRoom(2);
                 infoUI.show("Puzzle 2 completed.");
 
                 // Test Room Selector
@@ -265,14 +265,6 @@ public class GamePanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
 
                 mapManager.draw(g2);
-
-                g2.setColor(java.awt.Color.RED);
-                for (map.CollisionBox box :
-                        mapManager.getCurrentMap().getCollisionBoxes()) {
-                        g2.draw(
-                                box.getBounds()
-                        );
-                }
 
                 roomSelector.draw(g2, getWidth(), getHeight());
 
