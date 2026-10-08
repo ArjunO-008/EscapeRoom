@@ -4,6 +4,7 @@ import input.InputSystem;
 import interaction.Door;
 import interaction.Interactable;
 import interaction.InteractionSystem;
+import interaction.RoomDoor;
 import interaction.Safe;
 import interaction.SymbolLock;
 import inventory.InventoryManager;
@@ -172,32 +173,79 @@ public class GamePanel extends JPanel {
                 interactionSystem.setInteractables(
                         getInteractablesForRoom(roomId)
                 );
-}
+        }
 
-        /**
-         * Defines which interactable objects (keys, doors, puzzle triggers...)
-         * exist in a given room. Positions are placeholders until real map
-         * object data is used - adjust x/y to fit each room's layout.
-         */
         private List<Interactable> getInteractablesForRoom(int roomId) {
-                List<Interactable> list = new ArrayList<>();
 
-                if (roomId == 1) { // bedroom
-                        list.add(new SymbolLock(400, 370, 2, puzzleManager, interactionSystem, 630, 330,
-                                        "A note on the table reads: 4719"));
-                        list.add(new Safe(
+                List<Interactable> list =
+                        new ArrayList<>();
+
+                /*
+                * ========================================================
+                * LIVING ROOM
+                * ========================================================
+                */
+
+                if (roomId == 3) {
+                        list.add(
+                                new RoomDoor(
+                                        528,
+                                        193,
+                                        32,
+                                        64,
+                                        20,
+                                        () -> {
+
+                                                roomSelector.show(3);
+
+                                        }
+                                )
+                        );
+                }
+
+                if (roomId == 1) {
+
+                        list.add(
+                                new SymbolLock(
+                                        400,
+                                        370,
+                                        2,
+                                        puzzleManager,
+                                        interactionSystem,
+                                        630,
+                                        330,
+                                        "A note on the table reads: 4719"
+                                )
+                        );
+
+                        list.add(
+                                new Safe(
                                         450,
                                         300,
                                         1,
                                         puzzleManager,
                                         inventoryManager,
                                         interactionSystem,
-                                        infoUI));
-                        list.add(new Door(
+                                        infoUI
+                                )
+                        );
+
+                        list.add(
+                                new Door(
                                         430,
                                         450,
                                         inventoryManager,
-                                        infoUI));
+                                        infoUI
+                                )
+                        );
+                }
+
+
+                if (roomId == 2) {
+
+                        /*
+                        * We will add kitchen-specific interactions later.
+                        */
                 }
 
                 return list;
@@ -252,6 +300,13 @@ public class GamePanel extends JPanel {
 
                 if (inputSystem.consumeInteract()) {
                         interactionSystem.tryInteract();
+                }
+
+                int selectedRoomId =
+                roomSelector.getSelectedRoomId();
+
+                if (selectedRoomId != -1) {
+                        loadRoom(selectedRoomId);
                 }
 
                 infoUI.update();

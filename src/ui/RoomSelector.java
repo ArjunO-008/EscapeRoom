@@ -8,11 +8,23 @@ public class RoomSelector {
     private int currentRoomId;
 
     private int hoveredRoomId = -1;
+    private int selectedRoomId = -1;
+
+    public int getSelectedRoomId() {
+
+        int id = selectedRoomId;
+
+        selectedRoomId = -1;
+
+        return id;
+    }
 
     public void show(int currentRoomId) {
+
         this.currentRoomId = currentRoomId;
         this.visible = true;
         this.hoveredRoomId = -1;
+        this.selectedRoomId = -1;
     }
 
     public void hide() {
@@ -211,6 +223,8 @@ public class RoomSelector {
                     x,
                     y
             )) {
+
+                selectedRoomId = roomIds[i];
 
                 System.out.println(
                         "Selected: " + rooms[i]
