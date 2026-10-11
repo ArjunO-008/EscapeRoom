@@ -1,3 +1,4 @@
+
 package core;
 
 import input.InputSystem;
@@ -10,6 +11,7 @@ import interaction.Note;
 import interaction.Key;
 import interaction.SymbolLock;
 import inventory.InventoryManager;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -18,574 +20,656 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
 import map.MapManager;
 import player.Player;
 import puzzle.PuzzleManager;
 import ui.*;
 
-
 public class GamePanel extends JPanel {
 
-        private Timer gameTimer;
+    private Timer gameTimer;
 
-        private LoadingScreen loadingScreen;
-        private MainMenu mainMenu;
-        private WinScreen winScreen;
+    // UI screens
+    private LoadingScreen loadingScreen;
+    private MainMenu mainMenu;
+    private WinScreen winScreen;
+    private InfoUI infoUI;
+    private IntroUI introUI;
+    private RoomSelector roomSelector;
 
-        private InfoUI infoUI;
+    // Puzzle and inventory systems
+    private PuzzleManager puzzleManager;
+    private InventoryUI inventoryUI;
+    private InventoryManager inventoryManager;
 
-        private RoomSelector roomSelector;
+    // Player and input
+    private Player player;
+    private InputSystem inputSystem;
 
-        private PuzzleManager puzzleManager;
-        private InventoryUI inventoryUI;
+    // Map and interaction systems
+    private MapManager mapManager;
+    private InteractionSystem interactionSystem;
 
-        private Player player;
-        private InputSystem inputSystem;
+    // Current game state
+    private GameState gameState;
 
-        private MapManager mapManager;
+    public GamePanel() {
 
-        private InventoryManager inventoryManager;
-        private InteractionSystem interactionSystem;
+        setPreferredSize(new Dimension(960, 640));
+        setBackground(Color.BLACK);
 
-        private GameState gameState;
+        // Initialize UI screens
+        loadingScreen = new LoadingScreen();
+        mainMenu = new MainMenu();
+        winScreen = new WinScreen();
+        infoUI = new InfoUI();
+        introUI = new IntroUI();
+        roomSelector = new RoomSelector();
 
-        public GamePanel() {
-                setPreferredSize(new Dimension(960, 640));
-                setBackground(Color.BLACK);
+        gameState = GameState.MENU;
+        mainMenu.show();
 
-                // System.out.println("========== NEW GAME TEST ==========");
+        // Inventory and interaction systems
+        inventoryManager = new InventoryManager(infoUI);
+        interactionSystem = new InteractionSystem();
+        inventoryUI = new InventoryUI(inventoryManager);
 
-                // SaveManager.createNewSave();
+        // Puzzle system
+        puzzleManager = new PuzzleManager(infoUI);
 
-                // SaveData data = SaveManager.load();
+        // Player
+        player = new Player(0, 0);
 
-                // System.out.println("Continuity: "
-                // + data.isContinuity());
+        // Map manager
+        mapManager = new MapManager();
 
-                // System.out.println("Player X: "
-                // + data.getPlayerX());
+        // Input handling
+        inputSystem = new InputSystem(this);
 
-                // System.out.println("Player Y: "
-                // + data.getPlayerY());
+        setFocusable(true);
+        requestFocusInWindow();
 
-                // System.out.println("Room ID: "
-                // + data.getCurrentRoomId());
+        // Keyboard handling
+        addKeyListener(new java.awt.event.KeyAdapter() {
 
-                // System.out.println("Inventory size: "
-                // + data.getInventory().length);
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
 
-                // System.out.println("Puzzle 1 solved: "
-                // + data.getPuzzlesCompleted()[0]);
+                if (gameState == GameState.MENU
+                        && e.getKeyCode()
+                        == java.awt.event.KeyEvent.VK_ENTER) {
 
-                // System.out.println("===================================");
+                    startNewGame();
+                }
+            }
+        });
 
-                // UI screens
-                loadingScreen = new LoadingScreen();
-                mainMenu = new MainMenu();
-                winScreen = new WinScreen();
-                infoUI = new InfoUI();
+        // Mouse handling
+        addMouseListener(new MouseAdapter() {
 
-                roomSelector = new RoomSelector();
+            @Override
+            public void mousePressed(MouseEvent e) {
 
-                gameState = GameState.MENU;
-                mainMenu.show();
+                // Handle the introduction screen first.
+                if (gameState == GameState.INTRO) {
 
-                // Inventory + interactable objects (key, door, etc.)
-                inventoryManager = new InventoryManager(infoUI);
-                interactionSystem = new InteractionSystem();
-                inventoryUI = new InventoryUI(inventoryManager);
+                    if (introUI.isBeginButtonClicked(
+                            e.getX(),
+                            e.getY())) {
 
-                // Puzzle setup
-                puzzleManager = new PuzzleManager(infoUI);
-                // puzzleManager.openPuzzle(1); // .openPuzzle(ID)
+                        gameState = GameState.PLAYING;
 
-                // Player
-                player = new Player(0, 0);
-
-                // Maps
-                mapManager = new MapManager();
-
-                /*
-                 * loadRoom(ID);
-                 * ID:
-                 * 1 = Bedroom,
-                 * 2 = Kitchen,
-                 * 3 = Living Room.
-                 */
-
-                // Test Room Selector
-                // roomSelector.show(2);
-
-                // Input handling (movement only)
-                inputSystem = new InputSystem(this);
-                setFocusable(true);
-                requestFocusInWindow();
-
-                addKeyListener(new java.awt.event.KeyAdapter() {
-
-                        @Override
-                        public void keyPressed(java.awt.event.KeyEvent e) {
-
-                                if (gameState == GameState.MENU
-                                        && e.getKeyCode()
-                                                == java.awt.event.KeyEvent.VK_ENTER) {
-
-                                startNewGame();
-                                }
-                        }
-                });
-
-                addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mousePressed(MouseEvent e) {
-
-                                if (gameState != GameState.PLAYING) {
-                                        return;
-                                }
-
-                                if (roomSelector.isVisible()) {
-
-                                        roomSelector.handleClick(
-                                                e.getX(),
-                                                e.getY(),
-                                                getWidth(),
-                                                getHeight()
-                                        );
-
-                                        repaint();
-                                }
-                        }
-                });
-                addMouseMotionListener(new MouseAdapter() {
-
-                        @Override
-                        public void mouseMoved(MouseEvent e) {
-
-                                if (gameState != GameState.PLAYING) {
-                                        return;
-                                }
-
-                                if (roomSelector.isVisible()) {
-
-                                        roomSelector.handleMouseMove(
-                                                e.getX(),
-                                                e.getY(),
-                                                getWidth(),
-                                                getHeight()
-                                        );
-
-                                        repaint();
-                                }
-                        }
-                });
-
-                // Game loop (~60 FPS)
-                gameTimer = new Timer(16, e -> {
-                        update();
+                        requestFocusInWindow();
                         repaint();
-                });
-                gameTimer.start();
-        }
+                    }
 
-        private void startNewGame() {
-
-                System.out.println("Starting new game...");
-
-                gameState = GameState.LOADING;
-
-                loadingScreen.show();
-
-                mainMenu.startNewGame();
-                puzzleManager.resetPuzzles();
-                loadRoom(3);
-
-                gameState = GameState.PLAYING;
-
-                System.out.println("Loading complete.");
-        }
-
-        public void loadRoom(int roomId) {
-
-                String mapName = switch (roomId) {
-
-                        case 1 -> "bedroom";
-                        case 2 -> "kitchen";
-                        case 3 -> "living_room";
-                        default ->
-                                throw new IllegalArgumentException("Unknown room ID: " + roomId);
-                };
-
-                changeMap(mapName);
-
-                interactionSystem.setInteractables(
-                        getInteractablesForRoom(roomId)
-                );
-        }
-
-        private void winGame() {
-
-                gameState = GameState.WIN;
-
-                winScreen.show();
-
-                System.out.println(
-                        "Game completed!"
-                );
-                }
-        private Note createLivingRoomNote() {
-        return new Note(370, 200, "Digit 3 of 4: 1", "third_digit_1.png");
-        }
-
-        private List<Interactable> getInteractablesForRoom(int roomId) {
-
-                List<Interactable> list =
-                        new ArrayList<>();
-
-                /*
-                * ========================================================
-                * LIVING ROOM
-                * ========================================================
-                */
-
-                if (roomId == 3) {
-                        list.add(
-                                new RoomDoor(
-                                        528,
-                                        193,
-                                        32,
-                                        64,
-                                        20,
-                                        () -> {
-
-                                                roomSelector.show(3);
-
-                                        }
-                                )
-                        );
-                        list.add(
-                                new Door(
-                                        430,
-                                        450,
-                                        inventoryManager,
-                                        infoUI,
-                                        this::winGame
-                                )
-                        );
-        list.add(
-        new SymbolLock(
-                610,
-                320,
-                2,
-                puzzleManager,
-                () -> interactionSystem.addInteractable(createLivingRoomNote())
-        )
-);
-        if (puzzleManager.isPuzzleSolved(2)) {
-                list.add(new Note(370, 200, "Digit 3 of 4: 1", "third_digit_1.png"));
-        }
-        if (puzzleManager.isPuzzleSolved(2)) {
-        list.add(createLivingRoomNote());
-}
-
+                    return;
                 }
 
-                if (roomId == 1) {
-
-
-                        list.add(
-                                new Safe(
-                                        450,
-                                        300,
-                                        1,
-                                        puzzleManager,
-                                        inventoryManager,
-                                        interactionSystem,
-                                        infoUI
-                                )
-                        );
-                        list.add(
-                                new RoomDoor(
-                                        401,
-                                        490,
-                                        110,
-                                        65,
-                                        30,
-                                        () -> {
-
-                                                loadRoom(3);
-
-                                        }
-                                )
-                        );
-                        if (puzzleManager.isPuzzleSolved(1) && !inventoryManager.hasItem(Key.ITEM_ID)) {
-                                list.add(
-                                        new Key(
-                                                484,   // safe's x (450) + 24 + 10
-                                                300,   // same y as the safe
-                                                inventoryManager,
-                                                infoUI
-                                        )
-                                );
-                        }
-                        if (puzzleManager.isPuzzleSolved(2)) {
-                                list.add(new Note(630, 320, "Digit 1 of 4: 4", "first_digit_4.png"));
-                        }
+                // Ignore clicks outside gameplay.
+                if (gameState != GameState.PLAYING) {
+                    return;
                 }
 
-                if (roomId == 2) {
+                // Handle room selector clicks.
+                if (roomSelector.isVisible()) {
 
-                        list.add(
-                                new RoomDoor(
-                                        609,
-                                        381,
-                                        38,
-                                        95,
-                                        30,
-                                        () -> {
+                    roomSelector.handleClick(
+                            e.getX(),
+                            e.getY(),
+                            getWidth(),
+                            getHeight()
+                    );
 
-                                                loadRoom(3);
-
-                                        }
-                                )
-                        );
-                        if (puzzleManager.isPuzzleSolved(2)) {
-        list.add(new Note(400, 350, "Digit 2 of 4: 7", "second_digit_7.png"));
-        list.add(new Note(430, 230, "Digit 4 of 4: 9", "fourth_digit_9.png"));
-        }
-        
+                    repaint();
                 }
+            }
+        });
 
-                return list;
-        }
+        // Room selector hover handling
+        addMouseMotionListener(new MouseAdapter() {
 
-        /** Switches the active room and repositions the player. */
-        private void changeMap(String mapName) {
-
-                System.out.println("Changing room to: " + mapName);
-
-                mapManager.switchMap(mapName);
-
-                /*
-                * Get the configuration of the newly loaded room.
-                */
-                map.RoomConfig roomConfig = mapManager.getCurrentRoomConfig();
-
-                /*
-                * Spawn the player at the room's configured spawn point.
-                */
-                player.setX(roomConfig.getSpawnX());
-
-                player.setY(roomConfig.getSpawnY());
-
-                repaint();
-        }
-
-        /** Per-frame update: reads input and moves the player. */
-        private void update() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
 
                 if (gameState != GameState.PLAYING) {
-                        return;
+                    return;
                 }
 
-                final int speed = 4;
+                if (roomSelector.isVisible()) {
 
-                int dx = 0;
-                int dy = 0;
+                    roomSelector.handleMouseMove(
+                            e.getX(),
+                            e.getY(),
+                            getWidth(),
+                            getHeight()
+                    );
 
-                if (inputSystem.isUp())
-                        dy -= speed;
-
-                if (inputSystem.isDown())
-                        dy += speed;
-
-                if (inputSystem.isLeft())
-                        dx -= speed;
-
-                if (inputSystem.isRight())
-                        dx += speed;
-
-                player.moveBy(
-                        dx,
-                        dy,
-                        mapManager.getCurrentRoomConfig(),
-                        mapManager.getCurrentMap()
-                );
-
-                player.update();
-
-                interactionSystem.update(player);
-
-                if (inputSystem.consumeInteract()) {
-                        interactionSystem.tryInteract();
+                    repaint();
                 }
+            }
+        });
 
-                int selectedRoomId =
-                        roomSelector.getSelectedRoomId();
+        // Game loop: approximately 60 FPS
+        gameTimer = new Timer(16, e -> {
+            update();
+            repaint();
+        });
 
-                if (selectedRoomId != -1) {
-                        loadRoom(selectedRoomId);
-                }
+        gameTimer.start();
+    }
 
-                infoUI.update();
-                }
-        
-        private void drawLoadingFallback(Graphics2D g) {
+    // --------------------------------------------------
+    // Start a new game
+    // --------------------------------------------------
 
-                g.setColor(
-                        new Color(25, 18, 14)
-                );
+    private void startNewGame() {
 
-                g.fillRect(
-                        0,
-                        0,
-                        getWidth(),
-                        getHeight()
-                );
+        System.out.println("Starting new game...");
 
-                g.setColor(
-                        new Color(235, 218, 180)
-                );
+        gameState = GameState.LOADING;
 
-                g.setFont(
-                        new java.awt.Font(
-                                "Serif",
-                                java.awt.Font.BOLD,
-                                36
+        loadingScreen.show();
+
+        mainMenu.startNewGame();
+
+        puzzleManager.resetPuzzles();
+
+        // Load the starting room.
+        loadRoom(3);
+
+        // Show the story before allowing movement.
+        gameState = GameState.INTRO;
+
+        requestFocusInWindow();
+        repaint();
+
+        System.out.println("Introduction displayed.");
+    }
+
+    // --------------------------------------------------
+    // Load a room
+    // --------------------------------------------------
+
+    public void loadRoom(int roomId) {
+
+        String mapName = switch (roomId) {
+
+            case 1 -> "bedroom";
+            case 2 -> "kitchen";
+            case 3 -> "living_room";
+
+            default -> throw new IllegalArgumentException(
+                    "Unknown room ID: " + roomId
+            );
+        };
+
+        changeMap(mapName);
+
+        interactionSystem.setInteractables(
+                getInteractablesForRoom(roomId)
+        );
+    }
+
+    // --------------------------------------------------
+    // Win condition
+    // --------------------------------------------------
+
+    private void winGame() {
+
+        gameState = GameState.WIN;
+
+        winScreen.show();
+
+        repaint();
+
+        System.out.println("Game completed!");
+    }
+
+    // --------------------------------------------------
+    // Create puzzle note
+    // --------------------------------------------------
+
+    private Note createLivingRoomNote() {
+
+        return new Note(
+                370,
+                200,
+                "Digit 3 of 4: 1",
+                "third_digit_1.png"
+        );
+    }
+
+    // --------------------------------------------------
+    // Room interactables
+    // --------------------------------------------------
+
+    private List<Interactable> getInteractablesForRoom(
+            int roomId) {
+
+        List<Interactable> list = new ArrayList<>();
+
+        // ==============================================
+        // LIVING ROOM
+        // ==============================================
+
+        if (roomId == 3) {
+
+            list.add(
+                    new RoomDoor(
+                            528,
+                            193,
+                            32,
+                            64,
+                            20,
+                            () -> roomSelector.show(3)
+                    )
+            );
+
+            list.add(
+                    new Door(
+                            430,
+                            450,
+                            inventoryManager,
+                            infoUI,
+                            this::winGame
+                    )
+            );
+
+            list.add(
+                    new SymbolLock(
+                            610,
+                            320,
+                            2,
+                            puzzleManager,
+                            () -> interactionSystem.addInteractable(
+                                    createLivingRoomNote()
+                            )
+                    )
+            );
+
+            if (puzzleManager.isPuzzleSolved(2)) {
+
+                list.add(
+                        new Note(
+                                370,
+                                200,
+                                "Digit 3 of 4: 1",
+                                "third_digit_1.png"
                         )
                 );
 
-                String text = "LOADING...";
-
-                int textWidth =
-                        g.getFontMetrics()
-                                .stringWidth(text);
-
-                g.drawString(
-                        text,
-                        (getWidth() - textWidth) / 2,
-                        getHeight() / 2
-                );
+                list.add(createLivingRoomNote());
+            }
         }
 
-        private void drawWinFallback(Graphics2D g) {
+        // ==============================================
+        // BEDROOM
+        // ==============================================
 
-                g.setColor(
-                        new Color(25, 18, 14)
+        if (roomId == 1) {
+
+            list.add(
+                    new Safe(
+                            450,
+                            300,
+                            1,
+                            puzzleManager,
+                            inventoryManager,
+                            interactionSystem,
+                            infoUI
+                    )
+            );
+
+            list.add(
+                    new RoomDoor(
+                            401,
+                            490,
+                            110,
+                            65,
+                            30,
+                            () -> loadRoom(3)
+                    )
+            );
+
+            if (puzzleManager.isPuzzleSolved(1)
+                    && !inventoryManager.hasItem(Key.ITEM_ID)) {
+
+                list.add(
+                        new Key(
+                                484,
+                                300,
+                                inventoryManager,
+                                infoUI
+                        )
                 );
+            }
 
-                g.fillRect(
-                        0,
-                        0,
-                        getWidth(),
-                        getHeight()
+            if (puzzleManager.isPuzzleSolved(2)) {
+
+                list.add(
+                        new Note(
+                                630,
+                                320,
+                                "Digit 1 of 4: 4",
+                                "first_digit_4.png"
+                        )
                 );
+            }
+        }
 
-                g.setColor(
-                        new Color(235, 218, 180)
-                );
+        // ==============================================
+        // KITCHEN
+        // ==============================================
 
-                g.setFont(
-                        new java.awt.Font(
-                                "Serif",
-                                java.awt.Font.BOLD,
-                                50
+        if (roomId == 2) {
+
+            list.add(
+                    new RoomDoor(
+                            609,
+                            381,
+                            38,
+                            95,
+                            30,
+                            () -> loadRoom(3)
+                    )
+            );
+
+            if (puzzleManager.isPuzzleSolved(2)) {
+
+                list.add(
+                        new Note(
+                                400,
+                                350,
+                                "Digit 2 of 4: 7",
+                                "second_digit_7.png"
                         )
                 );
 
-                String text = "YOU ESCAPED!";
-
-                int textWidth =
-                        g.getFontMetrics()
-                                .stringWidth(text);
-
-                g.drawString(
-                        text,
-                        (getWidth() - textWidth) / 2,
-                        getHeight() / 2
+                list.add(
+                        new Note(
+                                430,
+                                230,
+                                "Digit 4 of 4: 9",
+                                "fourth_digit_9.png"
+                        )
                 );
+            }
         }
 
-        /** Renders the current room and the player. */
-        @Override
-        protected void paintComponent(Graphics g) {
+        return list;
+    }
 
-                super.paintComponent(g);
+    // --------------------------------------------------
+    // Change map
+    // --------------------------------------------------
 
-                        Graphics2D g2 =
-                                (Graphics2D) g.create();
+    private void changeMap(String mapName) {
 
-                        switch (gameState) {
+        System.out.println("Changing room to: " + mapName);
 
-                                case MENU:
+        mapManager.switchMap(mapName);
 
-                                        mainMenu.draw(
-                                                g2,
-                                                getWidth(),
-                                                getHeight()
-                                        );
+        map.RoomConfig roomConfig =
+                mapManager.getCurrentRoomConfig();
 
-                                        break;
+        player.setX(roomConfig.getSpawnX());
+        player.setY(roomConfig.getSpawnY());
 
-                                case LOADING:
+        repaint();
+    }
 
-                                        /*
-                                        * For now LoadingScreen has no
-                                        * graphical draw method.
-                                        *
-                                        * We will add it next.
-                                        */
-                                        drawLoadingFallback(g2);
+    // --------------------------------------------------
+    // Update game
+    // --------------------------------------------------
 
-                                        break;
+    private void update() {
 
-                                case PLAYING:
-
-                                        mapManager.draw(g2);
-
-                                        roomSelector.draw(
-                                                g2,
-                                                getWidth(),
-                                                getHeight()
-                                        );
-
-                                        interactionSystem.drawObjects(
-                                                g2
-                                        );
-
-                                        player.draw(g2);
-
-                                        interactionSystem.drawPrompt(
-                                                g2,
-                                                getWidth(),
-                                                getHeight()
-                                        );
-
-                                        infoUI.draw(
-                                                g2,
-                                                getWidth(),
-                                                getHeight()
-                                        );
-
-                                        inventoryUI.draw(
-                                                g2,
-                                                getHeight()
-                                        );
-
-                                        break;
-
-                                case WIN:
-
-                                        winScreen.draw(
-                                                g2,
-                                                getWidth(),
-                                                getHeight()
-                                        );
-
-                                        break;
-                        }
-
-                g2.dispose();
+        // Do not update gameplay during the intro,
+        // loading screen, menu, or victory screen.
+        if (gameState != GameState.PLAYING) {
+            return;
         }
+
+        final int speed = 4;
+
+        int dx = 0;
+        int dy = 0;
+
+        if (inputSystem.isUp()) {
+            dy -= speed;
+        }
+
+        if (inputSystem.isDown()) {
+            dy += speed;
+        }
+
+        if (inputSystem.isLeft()) {
+            dx -= speed;
+        }
+
+        if (inputSystem.isRight()) {
+            dx += speed;
+        }
+
+        player.moveBy(
+                dx,
+                dy,
+                mapManager.getCurrentRoomConfig(),
+                mapManager.getCurrentMap()
+        );
+
+        player.update();
+
+        interactionSystem.update(player);
+
+        if (inputSystem.consumeInteract()) {
+            interactionSystem.tryInteract();
+        }
+
+        int selectedRoomId =
+                roomSelector.getSelectedRoomId();
+
+        if (selectedRoomId != -1) {
+            loadRoom(selectedRoomId);
+        }
+
+        infoUI.update();
+    }
+
+    // --------------------------------------------------
+    // Loading screen fallback
+    // --------------------------------------------------
+
+    private void drawLoadingFallback(Graphics2D g) {
+
+        g.setColor(new Color(25, 18, 14));
+
+        g.fillRect(
+                0,
+                0,
+                getWidth(),
+                getHeight()
+        );
+
+        g.setColor(new Color(235, 218, 180));
+
+        g.setFont(
+                new java.awt.Font(
+                        "Serif",
+                        java.awt.Font.BOLD,
+                        36
+                )
+        );
+
+        String text = "LOADING...";
+
+        int textWidth =
+                g.getFontMetrics().stringWidth(text);
+
+        g.drawString(
+                text,
+                (getWidth() - textWidth) / 2,
+                getHeight() / 2
+        );
+    }
+
+    // --------------------------------------------------
+    // Victory screen fallback
+    // --------------------------------------------------
+
+    private void drawWinFallback(Graphics2D g) {
+
+        g.setColor(new Color(25, 18, 14));
+
+        g.fillRect(
+                0,
+                0,
+                getWidth(),
+                getHeight()
+        );
+
+        g.setColor(new Color(235, 218, 180));
+
+        g.setFont(
+                new java.awt.Font(
+                        "Serif",
+                        java.awt.Font.BOLD,
+                        50
+                )
+        );
+
+        String text = "YOU ESCAPED!";
+
+        int textWidth =
+                g.getFontMetrics().stringWidth(text);
+
+        g.drawString(
+                text,
+                (getWidth() - textWidth) / 2,
+                getHeight() / 2
+        );
+    }
+
+    // --------------------------------------------------
+    // Render current screen
+    // --------------------------------------------------
+
+    @Override
+    protected void paintComponent(Graphics g) {
+
+        super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D) g.create();
+
+        try {
+
+            switch (gameState) {
+
+                case MENU:
+
+                    mainMenu.draw(
+                            g2,
+                            getWidth(),
+                            getHeight()
+                    );
+
+                    break;
+
+                case LOADING:
+
+                    drawLoadingFallback(g2);
+
+                    break;
+
+                case INTRO:
+
+                    // Render the room behind the introduction.
+                    mapManager.draw(g2);
+
+                    interactionSystem.drawObjects(g2);
+
+                    player.draw(g2);
+
+                    // Render the story overlay.
+                    introUI.draw(
+                            g2,
+                            getWidth(),
+                            getHeight()
+                    );
+
+                    break;
+
+                case PLAYING:
+
+                    mapManager.draw(g2);
+
+                    roomSelector.draw(
+                            g2,
+                            getWidth(),
+                            getHeight()
+                    );
+
+                    interactionSystem.drawObjects(g2);
+
+                    player.draw(g2);
+
+                    interactionSystem.drawPrompt(
+                            g2,
+                            getWidth(),
+                            getHeight()
+                    );
+
+                    infoUI.draw(
+                            g2,
+                            getWidth(),
+                            getHeight()
+                    );
+
+                    inventoryUI.draw(
+                            g2,
+                            getHeight()
+                    );
+
+                    break;
+
+                case WIN:
+
+                    winScreen.draw(
+                            g2,
+                            getWidth(),
+                            getHeight()
+                    );
+
+                    break;
+            }
+
+        } finally {
+            g2.dispose();
+        }
+    }
 }
