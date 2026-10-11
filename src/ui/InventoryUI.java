@@ -2,11 +2,12 @@ package ui;
 
 import inventory.InventoryManager;
 
-import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
@@ -16,180 +17,218 @@ import javax.imageio.ImageIO;
 
 public class InventoryUI {
 
-    private static final int PANEL_WIDTH = 80;
-    private static final int SLOT_SIZE = 60;
-    private static final int SLOT_GAP = 10;
+    private static final int SLOT_COUNT = 3;
+    private static final int SLOT_SIZE = 56;
+
+    private static final int MARGIN = 0;
+    private static final int PADDING = 7;
+
+    private static final int HEADER_FONT_SIZE = 19;
+    private static final int HEADER_RADIUS = 14;
+
+    private static final int BORDER_THICKNESS = 3;
+
+    private static final Color WOOD = new Color(70, 42, 25);
+    private static final Color BEIGE = new Color(235, 218, 180);
+    private static final Color DARKER_BEIGE = new Color(205, 185, 145);
 
     private final InventoryManager inventoryManager;
 
-    private final Map<Integer, BufferedImage> itemImages =
-            new HashMap<>();
+    private final Map<Integer, BufferedImage> itemImages = new HashMap<>();
+
+    private final Font headerFont =
+            new Font(Font.SERIF, Font.BOLD, HEADER_FONT_SIZE);
 
     public InventoryUI(InventoryManager inventoryManager) {
         this.inventoryManager = inventoryManager;
-
         loadItemImages();
     }
 
     private void loadItemImages() {
-
         try {
-            BufferedImage keyImage =
-                    ImageIO.read(
-                            new File("src/map/resources/Key.png")
-                    );
+            BufferedImage keyImage = ImageIO.read(
+                    new File("src/map/resources/Key.png"));
 
             itemImages.put(1, keyImage);
 
         } catch (Exception e) {
-            System.out.println(
-                    "Failed to load inventory item images."
-            );
+            System.err.println(
+                    "Failed to load inventory item images.");
         }
     }
 
     public void draw(Graphics2D g, int screenHeight) {
-
         Graphics2D g2 = (Graphics2D) g.create();
 
-        g2.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON
-        );
+        try {
+            g2.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
 
-        /*
-         * Inventory position
-         *
-         * Left side of the screen.
-         */
-        int panelX = 10;
-        int panelY = 20;
+            g2.setStroke(new BasicStroke(
+                    BORDER_THICKNESS,
+                    BasicStroke.CAP_SQUARE,
+                    BasicStroke.JOIN_ROUND));
 
-        /*
-         * Background
-         */
-        g2.setComposite(
-                AlphaComposite.getInstance(
-                        AlphaComposite.SRC_OVER,
-                        0.88f
-                )
-        );
+            int bottomX = MARGIN;
+            int bottomY = MARGIN + getHeaderHeight() - 2;
 
-        g2.setColor(new Color(30, 24, 20));
+            int bottomWidth = SLOT_COUNT * SLOT_SIZE;
+            int bottomHeight = SLOT_SIZE;
 
-        int panelHeight =
-                55 + SLOT_SIZE + SLOT_GAP + 10;
+            drawBottomSection(
+                    g2,
+                    bottomX,
+                    bottomY,
+                    bottomWidth,
+                    bottomHeight);
 
-        g2.fillRoundRect(
-                panelX,
-                panelY,
-                PANEL_WIDTH,
-                panelHeight,
-                12,
-                12
-        );
+            drawHeader(
+                    g2,
+                    bottomX,
+                    bottomY,
+                    bottomWidth);
 
-        /*
-         * Border
-         */
-        g2.setColor(
-                new Color(220, 190, 150)
-        );
+            drawItems(g2, bottomX, bottomY);
 
-        g2.drawRoundRect(
-                panelX,
-                panelY,
-                PANEL_WIDTH,
-                panelHeight,
-                12,
-                12
-        );
+        } finally {
+            g2.dispose();
+        }
+    }
 
-        /*
-         * Inventory title
-         */
-        g2.setColor(Color.WHITE);
+    private int getHeaderHeight() {
+        java.awt.FontMetrics metrics =
+                java.awt.Toolkit.getDefaultToolkit()
+                        .getFontMetrics(headerFont);
 
-        g2.setFont(
-                new Font(
-                        Font.SANS_SERIF,
-                        Font.BOLD,
-                        10
-                )
-        );
+        return metrics.getHeight() + PADDING * 2;
+    }
 
-        String title = "ITEMS";
+    private void drawHeader(
+            Graphics2D g,
+            int bottomX,
+            int bottomY,
+            int bottomWidth) {
 
-        int titleWidth =
-                g2.getFontMetrics()
-                        .stringWidth(title);
+        java.awt.FontMetrics metrics = g.getFontMetrics(headerFont);
 
-        g2.drawString(
-                title,
-                panelX +
-                        (PANEL_WIDTH - titleWidth) / 2,
-                panelY + 20
-        );
+        String title = "Inventory";
 
-        /*
-         * Item slot
-         */
-        int slotX =
-                panelX +
-                (PANEL_WIDTH - SLOT_SIZE) / 2;
+        int textWidth = metrics.stringWidth(title);
+        int headerWidth = textWidth + PADDING * 2;
+        int headerHeight = metrics.getHeight() + PADDING * 2;
 
-        int slotY =
-                panelY + 28;
+        headerWidth = Math.min(
+                headerWidth,
+                (int) (bottomWidth * 0.75));
 
-        g2.setColor(
-                new Color(15, 15, 15)
-        );
+        int x = bottomX;
+        int y = bottomY - headerHeight + 2;
 
-        g2.fillRoundRect(
-                slotX,
-                slotY,
-                SLOT_SIZE,
-                SLOT_SIZE,
-                8,
-                8
-        );
+        int right = x + headerWidth;
+        int radius = HEADER_RADIUS;
 
-        g2.setColor(
-                new Color(150, 130, 110)
-        );
+        // Square top-left, rounded top-right,
+        // and square bottom corners.
+        Path2D.Double header = new Path2D.Double();
 
-        g2.drawRoundRect(
-                slotX,
-                slotY,
-                SLOT_SIZE,
-                SLOT_SIZE,
-                8,
-                8
-        );
+        header.moveTo(x, y);
+        header.lineTo(right - radius, y);
 
-        /*
-         * Draw Key
-         */
-        if (inventoryManager.hasItem(1)) {
+        header.quadTo(
+                right, y,
+                right, y + radius);
 
-            BufferedImage keyImage =
-                    itemImages.get(1);
+        header.lineTo(right, bottomY);
+        header.lineTo(x, bottomY);
+        header.closePath();
 
-            if (keyImage != null) {
+        // Beige header background.
+        g.setColor(WOOD);
+        g.fill(header);
 
-                int padding = 8;
+        // Brown header border.
+        g.setColor(WOOD);
+        g.draw(header);
 
-                g2.drawImage(
-                        keyImage,
-                        slotX + padding,
-                        slotY + padding,
-                        SLOT_SIZE - padding * 2,
-                        SLOT_SIZE - padding * 2,
-                        null
-                );
-            }
+        // Brown header text.
+        g.setFont(headerFont);
+        g.setColor(BEIGE);
+
+        int textX = x + (headerWidth - textWidth) / 2;
+        int textY = y + PADDING + metrics.getAscent();
+
+        g.drawString(title, textX, textY);
+    }
+
+    private void drawBottomSection(
+            Graphics2D g,
+            int x,
+            int y,
+            int width,
+            int height) {
+
+        // Brown outer rectangle.
+        g.setColor(WOOD);
+        g.fillRect(x, y, width, height);
+
+        // Three slot backgrounds:
+        // warm beige, darker beige, warm beige.
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            int slotX = x + i * SLOT_SIZE;
+
+            g.setColor(
+                    i == 1 ? DARKER_BEIGE : BEIGE);
+
+            g.fillRect(
+                    slotX + 2,
+                    y + 2,
+                    SLOT_SIZE - 4,
+                    height - 4);
         }
 
-        g2.dispose();
+        // Brown outer border.
+        g.setColor(WOOD);
+        g.drawRect(x, y, width, height);
+
+        // Brown dividers between slots.
+        for (int i = 1; i < SLOT_COUNT; i++) {
+            int dividerX = x + i * SLOT_SIZE;
+
+            g.drawLine(
+                    dividerX,
+                    y,
+                    dividerX,
+                    y + height);
+        }
+    }
+
+    private void drawItems(
+            Graphics2D g,
+            int slotsX,
+            int slotsY) {
+
+        if (!inventoryManager.hasItem(1)) {
+            return;
+        }
+
+        BufferedImage keyImage = itemImages.get(1);
+
+        if (keyImage == null) {
+            return;
+        }
+
+        int itemSize = 34;
+
+        int itemX = slotsX + (SLOT_SIZE - itemSize) / 2;
+        int itemY = slotsY + (SLOT_SIZE - itemSize) / 2;
+
+        g.drawImage(
+                keyImage,
+                itemX,
+                itemY,
+                itemSize,
+                itemSize,
+                null);
     }
 }
