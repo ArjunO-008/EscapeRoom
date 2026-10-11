@@ -6,6 +6,8 @@ import interaction.Interactable;
 import interaction.InteractionSystem;
 import interaction.RoomDoor;
 import interaction.Safe;
+import interaction.Note;
+import interaction.Key;
 import interaction.SymbolLock;
 import inventory.InventoryManager;
 import java.awt.Color;
@@ -232,6 +234,9 @@ public class GamePanel extends JPanel {
                         "Game completed!"
                 );
                 }
+        private Note createLivingRoomNote() {
+        return new Note(370, 200, "Digit 3 of 4: 1", "third_digit_1.png");
+        }
 
         private List<Interactable> getInteractablesForRoom(int roomId) {
 
@@ -268,22 +273,26 @@ public class GamePanel extends JPanel {
                                         this::winGame
                                 )
                         );
+        list.add(
+        new SymbolLock(
+                610,
+                320,
+                2,
+                puzzleManager,
+                () -> interactionSystem.addInteractable(createLivingRoomNote())
+        )
+);
+        if (puzzleManager.isPuzzleSolved(2)) {
+                list.add(new Note(370, 200, "Digit 3 of 4: 1", "third_digit_1.png"));
+        }
+        if (puzzleManager.isPuzzleSolved(2)) {
+        list.add(createLivingRoomNote());
+}
+
                 }
 
                 if (roomId == 1) {
 
-                        list.add(
-                                new SymbolLock(
-                                        400,
-                                        370,
-                                        2,
-                                        puzzleManager,
-                                        interactionSystem,
-                                        630,
-                                        330,
-                                        "A note on the table reads: 4719"
-                                )
-                        );
 
                         list.add(
                                 new Safe(
@@ -310,6 +319,19 @@ public class GamePanel extends JPanel {
                                         }
                                 )
                         );
+                        if (puzzleManager.isPuzzleSolved(1) && !inventoryManager.hasItem(Key.ITEM_ID)) {
+                                list.add(
+                                        new Key(
+                                                484,   // safe's x (450) + 24 + 10
+                                                300,   // same y as the safe
+                                                inventoryManager,
+                                                infoUI
+                                        )
+                                );
+                        }
+                        if (puzzleManager.isPuzzleSolved(2)) {
+                                list.add(new Note(630, 320, "Digit 1 of 4: 4", "first_digit_4.png"));
+                        }
                 }
 
                 if (roomId == 2) {
@@ -328,6 +350,11 @@ public class GamePanel extends JPanel {
                                         }
                                 )
                         );
+                        if (puzzleManager.isPuzzleSolved(2)) {
+        list.add(new Note(400, 350, "Digit 2 of 4: 7", "second_digit_7.png"));
+        list.add(new Note(430, 230, "Digit 4 of 4: 9", "fourth_digit_9.png"));
+        }
+        
                 }
 
                 return list;

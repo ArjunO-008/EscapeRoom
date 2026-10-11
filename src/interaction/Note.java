@@ -20,27 +20,30 @@ import javax.swing.JOptionPane;
  */
 public class Note implements Interactable {
 
-    private static final int WIDTH = 16;
-    private static final int HEIGHT = 12;
-    private static final int RANGE = 16;
+    private static final int WIDTH = 20;
+    private static final int HEIGHT = 24;
+    private static final int RANGE = 40;
 
     // How wide the popup's note image should appear on screen, regardless
     // of the source file's actual pixel dimensions. Height scales to match.
     private static final int POPUP_IMAGE_WIDTH = 220;
+
 
     private final int x;
     private final int y;
     private final String message; // fallback text, used only if the popup image fails to load
     private BufferedImage sprite;       // small icon drawn on the table in-world
     private BufferedImage contentImage; // bigger "readable" image shown in the popup
+    private final String contentImageName; // which popup image this note shows
 
-    public Note(int x, int y, String message) {
-        this.x = x;
-        this.y = y;
-        this.message = message;
+    public Note(int x, int y, String message, String contentImageName) {
+    this.x = x;
+    this.y = y;
+    this.message = message;
+    this.contentImageName = contentImageName;
 
-        sprite = loadSprite();
-        contentImage = loadContentImage();
+    sprite = loadSprite();
+    contentImage = loadContentImage();
     }
 
     private BufferedImage loadSprite() {
@@ -53,12 +56,12 @@ public class Note implements Interactable {
     }
 
     private BufferedImage loadContentImage() {
-        try {
-            return ImageIO.read(new File("src/map/resources/note_content.png"));
-        } catch (Exception e) {
-            System.out.println("Failed to load note content image, falling back to text popup.");
-            return null;
-        }
+    try {
+        return ImageIO.read(new File("src/map/resources/" + contentImageName));
+    } catch (Exception e) {
+        System.out.println("Failed to load " + contentImageName + ", falling back to text popup.");
+        return null;
+    }
     }
 
     @Override

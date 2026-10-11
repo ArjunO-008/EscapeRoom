@@ -16,45 +16,34 @@ import javax.imageio.ImageIO;
  */
 public class SymbolLock implements Interactable {
 
-    private static final int WIDTH = 40;
-    private static final int HEIGHT = 40;
+    private static final int WIDTH = 16;
+    private static final int HEIGHT = 20;
     private static final int RANGE = 16;
 
-    private final int x;
+        private final int x;
     private final int y;
     private final int puzzleId;
     private final PuzzleManager puzzleManager;
-    private final InteractionSystem interactionSystem;
-
-    private final int noteX;
-    private final int noteY;
-    private final String noteMessage;
+    private final Runnable onSolved;
 
     private BufferedImage sprite;
 
-    private boolean noteDropped = false;
-
     public SymbolLock(
-            int x,
-            int y,
-            int puzzleId,
-            PuzzleManager puzzleManager,
-            InteractionSystem interactionSystem,
-            int noteX,
-            int noteY,
-            String noteMessage) {
+        int x,
+        int y,
+        int puzzleId,
+        PuzzleManager puzzleManager,
+        Runnable onSolved) {
 
-        this.x = x;
-        this.y = y;
-        this.puzzleId = puzzleId;
-        this.puzzleManager = puzzleManager;
-        this.interactionSystem = interactionSystem;
-        this.noteX = noteX;
-        this.noteY = noteY;
-        this.noteMessage = noteMessage;
+    this.x = x;
+    this.y = y;
+    this.puzzleId = puzzleId;
+    this.puzzleManager = puzzleManager;
+    this.onSolved = onSolved;
 
-        sprite = loadSprite();
-    }
+    sprite = loadSprite();
+}
+    
 
     private BufferedImage loadSprite() {
     try {
@@ -80,11 +69,9 @@ public class SymbolLock implements Interactable {
 
         puzzleManager.openPuzzle(puzzleId);
 
-        boolean isSolvedNow = puzzleManager.isPuzzleSolved(puzzleId);
-
-        if (!wasSolvedBefore && isSolvedNow && !noteDropped) {
-            interactionSystem.addInteractable(new Note(noteX, noteY, noteMessage));
-            noteDropped = true;
+        // Only fire the moment it first becomes solved.
+        if (!wasSolvedBefore && puzzleManager.isPuzzleSolved(puzzleId)) {
+            onSolved.run();
         }
     }
 
