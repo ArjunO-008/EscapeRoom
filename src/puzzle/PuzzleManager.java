@@ -1,0 +1,171 @@
+package puzzle;
+
+import save.SaveData;
+import save.SaveManager;
+import ui.InfoUI;
+
+public class PuzzleManager {
+
+    private Puzzle1 puzzle1;
+    private Puzzle2 puzzle2;
+
+    // Stores whether each puzzle has been completed.
+    // Index 0 = Puzzle 1
+    // Index 1 = Puzzle 2
+    // etc.
+    private boolean[] solvedPuzzles;
+
+    // Single place that says how many puzzles the game has.
+    private static final int PUZZLE_COUNT = 2;
+
+    private final InfoUI infoUI;
+
+    public PuzzleManager(InfoUI infoUI) {
+        this.infoUI = infoUI;
+
+        puzzle1 = new Puzzle1(this);
+        puzzle2 = new Puzzle2(this);
+
+        solvedPuzzles = new boolean[PUZZLE_COUNT];
+        loadPuzzleState();
+    }
+
+    // --------------------------------------------------
+    // Open a puzzle
+    // --------------------------------------------------
+
+    public void openPuzzle(int puzzleId) {
+
+        // First check whether the puzzle is already solved
+        if (isPuzzleSolved(puzzleId)) {
+
+            infoUI.show("Puzzle " + puzzleId + " completed.");
+
+            return;
+        }
+
+        switch (puzzleId) {
+
+            case 1:
+                puzzle1.show();
+                break;
+            case 2:
+                puzzle2.show();
+                break;
+
+            default:
+                System.out.println("Unknown Puzzle");
+                break;
+        }
+    }
+
+    // --------------------------------------------------
+    // Check whether a puzzle is solved
+    // --------------------------------------------------
+
+    public boolean isPuzzleSolved(int puzzleId) {
+
+        // Convert puzzle ID to array index
+        int index = puzzleId - 1;
+
+        // Invalid puzzle ID
+        if (index < 0 || index >= solvedPuzzles.length) {
+            return false;
+        }
+
+        return solvedPuzzles[index];
+    }
+
+    // --------------------------------------------------
+    // Mark puzzle as completed
+    // --------------------------------------------------
+
+    public void completePuzzle(int puzzleId) {
+
+        int index = puzzleId - 1;
+
+        // Invalid puzzle ID
+        if (index < 0 || index >= solvedPuzzles.length) {
+            System.out.println("Unknown puzzle id: " + puzzleId);
+
+            return;
+        }
+
+        // Mark puzzle as solved
+        solvedPuzzles[index] = true;
+
+        infoUI.show("Puzzle " + puzzleId + " completed.");
+
+        // Save the updated puzzle state
+        savePuzzleState();
+    }
+
+    // --------------------------------------------------
+    // Save puzzle state
+    // --------------------------------------------------
+
+    private void savePuzzleState() {
+
+        // Load the current save
+        SaveData saveData = SaveManager.load();
+
+        // No save exists yet
+        if (saveData == null) {
+
+            System.out.println(
+                    "Cannot save puzzle state: no save exists.");
+
+            return;
+        }
+
+        // Update puzzle state
+        saveData.setPuzzlesCompleted(solvedPuzzles);
+
+        // Save everything again
+        SaveManager.save(saveData);
+    }
+
+    // --------------------------------------------------
+    // Load puzzle state
+    // --------------------------------------------------
+
+    private void loadPuzzleState() {
+
+        SaveData saveData = SaveManager.load();
+
+        // No existing save
+        if (saveData == null) {
+            return;
+        }
+
+        boolean[] savedPuzzles = saveData.getPuzzlesCompleted();
+
+        // Make sure the saved data fits
+        // the number of puzzles currently in the game.
+        if (savedPuzzles == null) {
+            return;
+        }
+
+        // Copy the saved puzzle states
+        int count = Math.min(
+                solvedPuzzles.length,
+                savedPuzzles.length);
+
+        for (int i = 0; i < count; i++) {
+
+            solvedPuzzles[i] = savedPuzzles[i];
+        }
+    }
+    public void resetPuzzles() {
+
+        solvedPuzzles = new boolean[PUZZLE_COUNT];
+        savePuzzleState();
+    }
+
+    // Re-reads puzzle progress from the save file (used by Continue).
+    public void reloadFromSave() {
+
+        solvedPuzzles = new boolean[PUZZLE_COUNT];
+        loadPuzzleState();
+    }
+}

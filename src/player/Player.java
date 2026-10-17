@@ -1,0 +1,292 @@
+package player;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import map.RoomConfig;
+import java.awt.geom.Rectangle2D;
+
+public class Player {
+
+    private int x;
+    private int y;
+
+    private final int width = 32;
+    private final int height = 48;
+
+    private final int collisionWidth = 20;
+    private final int collisionHeight = 12;
+
+    private final int collisionOffsetX = 6;
+    private final int collisionOffsetY = 32;
+
+    // 0 = Down, 1 = Left, 2 = Right, 3 = Up
+    private int direction = 0;
+
+    private BufferedImage[] idleSprites = new BufferedImage[4];
+    private BufferedImage[] walkSprites = new BufferedImage[8];
+
+    private boolean moving = false;
+
+    private int animationFrame = 0;
+    private int animationCounter = 0;
+
+    // Animation speed
+    private final int animationSpeed = 8;
+
+    public Player(int x, int y) {
+        this.x = x;
+        this.y = y;
+
+        loadSprites();
+    }
+
+    private void loadSprites() {
+
+        // Idle
+        idleSprites[0] = loadSprite("SpriteSheet_001.png"); // Down
+        idleSprites[1] = loadSprite("SpriteSheet_003.png"); // Left
+        idleSprites[2] = loadSprite("SpriteSheet_005.png"); // Right
+        idleSprites[3] = loadSprite("SpriteSheet_011.png"); // Up
+
+        // Walking
+        walkSprites[0] = loadSprite("SpriteSheet_002.png"); // Down 1
+        walkSprites[1] = loadSprite("SpriteSheet_015.png"); // Down 2
+
+        walkSprites[2] = loadSprite("SpriteSheet_007.png"); // Left 1
+        walkSprites[3] = loadSprite("SpriteSheet_008.png"); // Left 2
+
+        walkSprites[4] = loadSprite("SpriteSheet_005.png"); // Right 1
+        walkSprites[5] = loadSprite("SpriteSheet_006.png"); // Right 2
+
+        walkSprites[6] = loadSprite("SpriteSheet_020.png"); // Up 1
+        walkSprites[7] = loadSprite("SpriteSheet_021.png"); // Up 2
+    }
+
+    private BufferedImage loadSprite(String name) {
+
+        // 1) Project file path (works with `java -cp bin core.App`,
+        //    the same way the rest of the game loads its assets).
+        java.io.File file =
+                new java.io.File("src/player/SpriteSheet/" + name);
+
+        try {
+            if (file.exists()) {
+                return ImageIO.read(file);
+            }
+
+            // 2) Fall back to the classpath (works when src is on it).
+            java.net.URL url = getClass().getResource(
+                    "/player/SpriteSheet/" + name);
+
+            if (url != null) {
+                return ImageIO.read(url);
+            }
+
+            System.out.println("Sprite not found: " + name);
+            return null;
+
+        } catch (Exception e) {
+            System.out.println("Failed to load: " + name);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void update() {
+
+        if (moving) {
+
+            animationCounter++;
+
+            if (animationCounter >= animationSpeed) {
+                animationCounter = 0;
+
+                animationFrame++;
+
+                if (animationFrame >= 2)
+                    animationFrame = 0;
+            }
+
+        } else {
+
+            animationFrame = 0;
+            animationCounter = 0;
+        }
+    }
+
+    public void draw(Graphics2D g) {
+
+        BufferedImage sprite;
+
+        if (moving) {
+
+            int index = direction * 2 + animationFrame;
+
+            sprite = walkSprites[index];
+
+        } else {
+
+            sprite = idleSprites[direction];
+        }
+
+        if (sprite == null)
+            return;
+
+        g.drawImage(
+                sprite,
+                x,
+                y,
+                width,
+                height,
+                null);
+    }
+
+    public void moveBy(
+            int dx,
+            int dy,
+            RoomConfig roomConfig,
+            map.TileMap tileMap
+    ) {
+
+        int oldX = x;
+        int oldY = y;
+
+        /*
+        * Update facing direction.
+        */
+        if (dx < 0)
+            direction = 1;
+        else if (dx > 0)
+            direction = 2;
+        else if (dy < 0)
+            direction = 3;
+        else if (dy > 0)
+            direction = 0;
+
+        int newX = x + dx;
+
+        if (canMoveTo(
+                newX,
+                y,
+                roomConfig,
+                tileMap
+        )) {
+
+            x = newX;
+        }
+
+        int newY = y + dy;
+
+        if (canMoveTo(
+                x,
+                newY,
+                roomConfig,
+                tileMap
+        )) {
+
+            y = newY;
+        }
+
+        /*
+        * Animation.
+        */
+        moving =
+                x != oldX
+                        || y != oldY;
+    }
+
+    private boolean canMoveTo(
+        int playerX,
+        int playerY,
+        RoomConfig roomConfig,
+        map.TileMap tileMap
+    ) {
+
+        Rectangle2D.Double playerBounds =
+                getCollisionBounds(
+                        playerX,
+                        playerY
+                );
+
+        if (!roomConfig.canMoveTo(
+                playerBounds,
+                playerX,
+                playerY,
+                width,
+                height
+        )) {
+
+            return false;
+        }
+
+        for (map.CollisionBox box :
+                tileMap.getCollisionBoxes()) {
+
+            if (box.intersects(
+                    playerBounds.x,
+                    playerBounds.y,
+                    playerBounds.width,
+                    playerBounds.height
+            )) {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private Rectangle2D.Double getCollisionBounds(
+            int playerX,
+            int playerY
+        ) {
+
+        return new Rectangle2D.Double(
+                playerX + collisionOffsetX,
+                playerY + collisionOffsetY,
+                collisionWidth,
+                collisionHeight
+        );
+    }
+
+    // True if the player's feet box fits at this position (used when
+    // restoring a saved position).
+    public boolean canStandAt(
+            int playerX,
+            int playerY,
+            RoomConfig roomConfig,
+            map.TileMap tileMap
+    ) {
+        return canMoveTo(playerX, playerY, roomConfig, tileMap);
+    }
+
+    /** True if the last moveBy() actually changed the player's position. */
+    public boolean isMoving() {
+        return moving;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+}
