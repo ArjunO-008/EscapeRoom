@@ -67,7 +67,7 @@ public class Door implements Interactable {
 
     @Override
     public void draw(Graphics2D g) {
-        // No visual here on purpose — the map's own door tile is the art.
+        // No visual here on purpose - the map's own door tile is the art.
         // This object only exists to detect proximity + E presses.
 
     }

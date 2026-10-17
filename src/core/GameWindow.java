@@ -14,6 +14,16 @@ public class GameWindow extends JFrame{
         GamePanel panel = new GamePanel();
         add(panel);
         pack();
+        setLocationRelativeTo(null); // centre on screen
+
+        // Remember room / position / inventory when the window is closed.
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                panel.saveOnExit();
+            }
+        });
+
         setVisible(true);
     }
     

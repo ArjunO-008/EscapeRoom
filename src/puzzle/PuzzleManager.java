@@ -15,6 +15,9 @@ public class PuzzleManager {
     // etc.
     private boolean[] solvedPuzzles;
 
+    // Single place that says how many puzzles the game has.
+    private static final int PUZZLE_COUNT = 2;
+
     private final InfoUI infoUI;
 
     public PuzzleManager(InfoUI infoUI) {
@@ -23,7 +26,7 @@ public class PuzzleManager {
         puzzle1 = new Puzzle1(this);
         puzzle2 = new Puzzle2(this);
 
-        solvedPuzzles = new boolean[2];
+        solvedPuzzles = new boolean[PUZZLE_COUNT];
         loadPuzzleState();
     }
 
@@ -83,7 +86,7 @@ public class PuzzleManager {
 
         // Invalid puzzle ID
         if (index < 0 || index >= solvedPuzzles.length) {
-          infoUI.show("Puzzle " + puzzleId + " completed.");
+            System.out.println("Unknown puzzle id: " + puzzleId);
 
             return;
         }
@@ -155,7 +158,14 @@ public class PuzzleManager {
     }
     public void resetPuzzles() {
 
-        solvedPuzzles = new boolean[2];
+        solvedPuzzles = new boolean[PUZZLE_COUNT];
         savePuzzleState();
+    }
+
+    // Re-reads puzzle progress from the save file (used by Continue).
+    public void reloadFromSave() {
+
+        solvedPuzzles = new boolean[PUZZLE_COUNT];
+        loadPuzzleState();
     }
 }

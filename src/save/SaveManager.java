@@ -89,10 +89,10 @@ public class SaveManager {
 
                     true,       // Continuity
 
-                    100.0f,     // Player X
-                    100.0f,     // Player Y
+                    432.0f,     // Player X (living room spawn)
+                    316.0f,     // Player Y (living room spawn)
 
-                    1,          // Starting Room ID
+                    3,          // Starting Room ID (living room)
 
                     inventory,
 

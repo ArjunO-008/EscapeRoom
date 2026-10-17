@@ -4,6 +4,10 @@ import java.awt.*;
 
 public class RoomSelector {
 
+    // Panel height as a fraction of the window. Used by draw, click AND hover
+    // so the clickable area always matches what is drawn.
+    private static final double PANEL_RATIO = 0.18;
+
     private boolean visible = false;
     private int currentRoomId;
 
@@ -36,6 +40,12 @@ public class RoomSelector {
         return visible;
     }
 
+    // True while the mouse is over a clickable option (GamePanel uses this
+    // to switch to the hand cursor).
+    public boolean isHovering() {
+        return visible && hoveredRoomId != -1;
+    }
+
     public void draw(Graphics2D g, int width, int height) {
 
         if (!visible)
@@ -45,7 +55,7 @@ public class RoomSelector {
         // PANEL
         // =========================
 
-        int panelHeight = (int) (height * 0.18);
+        int panelHeight = (int) (height * PANEL_RATIO);
         int panelY = height - panelHeight;
 
         // Wooden border
@@ -191,7 +201,7 @@ public class RoomSelector {
         if (!visible)
             return;
 
-        int panelHeight = (int) (height * 0.15);
+        int panelHeight = (int) (height * PANEL_RATIO);
         int panelY = height - panelHeight;
 
         int x = 25;
@@ -265,7 +275,7 @@ public class RoomSelector {
 
         hoveredRoomId = -1;
 
-        int panelHeight = (int) (height * 0.15);
+        int panelHeight = (int) (height * PANEL_RATIO);
         int panelY = height - panelHeight;
 
         int x = 25;
@@ -347,6 +357,6 @@ public class RoomSelector {
 
     private void setHandCursor(boolean hand) {
 
-        // Cursor handling is done by GamePanel.
+        // Cursor handling is done by GamePanel via isHovering().
     }
 }

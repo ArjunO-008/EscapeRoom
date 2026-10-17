@@ -65,10 +65,27 @@ public class Player {
 
     private BufferedImage loadSprite(String name) {
 
+        // 1) Project file path (works with `java -cp bin core.App`,
+        //    the same way the rest of the game loads its assets).
+        java.io.File file =
+                new java.io.File("src/player/SpriteSheet/" + name);
+
         try {
-            return ImageIO.read(
-                    getClass().getResource(
-                            "/player/SpriteSheet/" + name));
+            if (file.exists()) {
+                return ImageIO.read(file);
+            }
+
+            // 2) Fall back to the classpath (works when src is on it).
+            java.net.URL url = getClass().getResource(
+                    "/player/SpriteSheet/" + name);
+
+            if (url != null) {
+                return ImageIO.read(url);
+            }
+
+            System.out.println("Sprite not found: " + name);
+            return null;
+
         } catch (Exception e) {
             System.out.println("Failed to load: " + name);
             e.printStackTrace();
@@ -206,8 +223,11 @@ public class Player {
         for (map.CollisionBox box :
                 tileMap.getCollisionBoxes()) {
 
-            if (box.getBounds().intersects(
-                    playerBounds
+            if (box.intersects(
+                    playerBounds.x,
+                    playerBounds.y,
+                    playerBounds.width,
+                    playerBounds.height
             )) {
 
                 return false;
@@ -228,6 +248,17 @@ public class Player {
                 collisionWidth,
                 collisionHeight
         );
+    }
+
+    // True if the player's feet box fits at this position (used when
+    // restoring a saved position).
+    public boolean canStandAt(
+            int playerX,
+            int playerY,
+            RoomConfig roomConfig,
+            map.TileMap tileMap
+    ) {
+        return canMoveTo(playerX, playerY, roomConfig, tileMap);
     }
 
     public int getX() {

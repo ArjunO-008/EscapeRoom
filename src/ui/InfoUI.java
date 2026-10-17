@@ -5,21 +5,24 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class InfoUI {
 
     private static class Message {
         String text;
-        long createdAt;
+
+        // Set when the message reaches the front of the queue (i.e. when it
+        // actually becomes visible), NOT when it was queued.
+        long shownAt = -1;
 
         Message(String text) {
             this.text = text;
-            this.createdAt = System.currentTimeMillis();
         }
     }
 
-    private final Queue<Message> messages = new LinkedList<>();
+    private static final int MAX_QUEUED = 4;
+
+    private final LinkedList<Message> messages = new LinkedList<>();
 
     // How long a message stays visible.
     private static final long DISPLAY_TIME = 2500;
@@ -33,7 +36,27 @@ public class InfoUI {
             return;
         }
 
+        // Ignore an exact repeat of the newest message (e.g. mashing E on a
+        // locked door) and don't let the queue grow without limit.
+        Message last = messages.peekLast();
+
+        if (last != null && last.text.equals(message)) {
+            return;
+        }
+
+        if (messages.size() >= MAX_QUEUED) {
+            return;
+        }
+
         messages.add(new Message(message));
+    }
+
+    private long elapsed(Message m) {
+        if (m.shownAt < 0) {
+            return 0;
+        }
+
+        return System.currentTimeMillis() - m.shownAt;
     }
 
     public void update() {
@@ -43,10 +66,13 @@ public class InfoUI {
             return;
         }
 
-        long elapsed =
-                System.currentTimeMillis() - current.createdAt;
+        // First frame this message is at the front: start its timer now.
+        if (current.shownAt < 0) {
+            current.shownAt = System.currentTimeMillis();
+            return;
+        }
 
-        if (elapsed >= DISPLAY_TIME) {
+        if (elapsed(current) >= DISPLAY_TIME) {
             messages.poll();
         }
     }
@@ -59,8 +85,7 @@ public class InfoUI {
             return;
         }
 
-        long elapsed =
-                System.currentTimeMillis() - current.createdAt;
+        long elapsed = elapsed(current);
 
         // Fade in/out
         float alpha = 1.0f;

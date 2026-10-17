@@ -98,6 +98,18 @@ public class InputSystem {
 
     }
 
+    // Forgets every held key. Needed after a modal dialog closes: the key
+    // RELEASE events went to the dialog, so the game would otherwise think
+    // the key is still held down.
+    public void reset() {
+        up = false;
+        down = false;
+        left = false;
+        right = false;
+        interactHeld = false;
+        interactPressed = false;
+    }
+
     public boolean isUp() {
         return up;
     }

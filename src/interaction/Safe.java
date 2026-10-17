@@ -63,6 +63,12 @@ public class Safe implements Interactable {
         }
     }
 
+    // Where the key appears next to a safe at safeX. GamePanel uses this too,
+    // so the key is in the same spot when the room is re-entered.
+    public static int keyDropX(int safeX) {
+        return safeX + WIDTH + 10;
+    }
+
     @Override
     public Rectangle getInteractionBounds() {
         return new Rectangle(
@@ -85,7 +91,7 @@ public class Safe implements Interactable {
         if (!wasSolvedBefore && isSolvedNow && !keyDropped) {
             interactionSystem.addInteractable(
                     new Key(
-                            x + WIDTH + 10,
+                            keyDropX(x),
                             y,
                             inventoryManager,
                             infoUI));

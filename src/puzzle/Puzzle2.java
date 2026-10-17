@@ -20,7 +20,6 @@ public class Puzzle2 {
 
     private static final int SEQUENCE_LENGTH = 4;
     private static final int NUM_BUTTONS = 4;
-    private static final int STEP_DELAY_MS = 600;
 
     // The four symbol colors - peach, brown, light green, dark green.
     private static final Color[] COLORS = {
@@ -44,6 +43,12 @@ public class Puzzle2 {
     private JDialog dialog;
     private JButton[] buttons;
     private boolean acceptingInput = false;
+    private Timer flashTimer;
+
+    // How long a symbol stays lit, and the dark gap between two symbols.
+    // The gap is what makes two identical symbols in a row look like two flashes.
+    private static final int FLASH_MS = 450;
+    private static final int GAP_MS = 200;
 
 
     public Puzzle2(PuzzleManager puzzleManager) {
@@ -103,29 +108,53 @@ public class Puzzle2 {
     }
 
     // Flashes each button in the sequence, one at a time, using a Timer.
+    // Each symbol has an ON phase (border shown) and an OFF phase (border
+    // cleared, short dark gap) so repeated symbols are clearly two flashes.
     private void playSequence() {
-        Timer timer = new Timer(STEP_DELAY_MS, null);
-        int[] step = {0}; // array trick so the lambda below can modify it
+        if (flashTimer != null) {
+            flashTimer.stop();
+        }
 
-        timer.addActionListener(e -> {
-            if (step[0] > 0) {
-                buttons[sequence.get(step[0] - 1)].setBorder(null);
-            }
+        for (JButton b : buttons) {
+            b.setBorder(null);
+        }
 
-            if (step[0] >= sequence.size()) {
-                timer.stop();
-                acceptingInput = true;
+        int[] step = {0};          // how many symbols have been lit so far
+        boolean[] lit = {false};   // true while a symbol is currently lit
+
+        flashTimer = new Timer(GAP_MS, null);
+
+        flashTimer.addActionListener(e -> {
+
+            // Dialog was closed mid-demo: stop quietly.
+            if (dialog == null || !dialog.isDisplayable()) {
+                flashTimer.stop();
                 return;
             }
 
+            if (lit[0]) {
+                // OFF phase: clear the border that was lit.
+                buttons[sequence.get(step[0] - 1)].setBorder(null);
+                lit[0] = false;
+                flashTimer.setDelay(GAP_MS);
+
+                if (step[0] >= sequence.size()) {
+                    flashTimer.stop();
+                    acceptingInput = true;
+                }
+                return;
+            }
+
+            // ON phase: light the next symbol.
             buttons[sequence.get(step[0])].setBorder(
                     BorderFactory.createLineBorder(Color.WHITE, 4));
-
             step[0]++;
+            lit[0] = true;
+            flashTimer.setDelay(FLASH_MS);
         });
 
-        timer.setInitialDelay(300);
-        timer.start();
+        flashTimer.setInitialDelay(300);
+        flashTimer.start();
     }
 
     private void onButtonClicked(int index) {

@@ -48,7 +48,7 @@ public class Note implements Interactable {
 
     private BufferedImage loadSprite() {
         try {
-            return ImageIO.read(new File("src/map/resources/note.png"));
+            return ImageIO.read(new File("src/map/resources/Note.png"));
         } catch (Exception e) {
             System.out.println("Failed to load note sprite, using placeholder.");
             return null;

@@ -1,6 +1,7 @@
-
 package core;
 
+import audio.SoundManager;
+import audio.SoundManager.Sfx;
 import input.InputSystem;
 import interaction.Door;
 import interaction.Interactable;
@@ -27,6 +28,8 @@ import javax.swing.Timer;
 import map.MapManager;
 import player.Player;
 import puzzle.PuzzleManager;
+import save.SaveData;
+import save.SaveManager;
 import ui.*;
 
 public class GamePanel extends JPanel {
@@ -57,10 +60,31 @@ public class GamePanel extends JPanel {
     // Current game state
     private GameState gameState;
 
+    // True once ENTER / SPACE was pressed during the intro (acted on at release).
+    private boolean introKeyArmed = false;
+
+    // True while a modal popup (safe keypad, symbol lock, note) is open.
+    // Gameplay is paused so the player can't keep walking underneath it.
+    private boolean modalActive = false;
+
+    // True while Continue is restoring a save, so loadRoom() doesn't
+    // overwrite the saved position with the spawn point.
+    private boolean restoring = false;
+
+    // Room the player is currently in (saved for Continue).
+    private int currentRoomId = 3;
+
+    // Fixed world positions used in more than one place.
+    private static final int SAFE_X = 450;
+    private static final int SAFE_Y = 300;
+
     public GamePanel() {
 
         setPreferredSize(new Dimension(960, 640));
         setBackground(Color.BLACK);
+
+        // Synthesizes the sound effects in the background.
+        SoundManager.init();
 
         // Initialize UI screens
         loadingScreen = new LoadingScreen();
@@ -75,6 +99,7 @@ public class GamePanel extends JPanel {
 
         // Inventory and interaction systems
         inventoryManager = new InventoryManager(infoUI);
+        inventoryManager.setOnChange(this::saveProgress);
         interactionSystem = new InteractionSystem();
         inventoryUI = new InventoryUI(inventoryManager);
 
@@ -93,17 +118,90 @@ public class GamePanel extends JPanel {
         setFocusable(true);
         requestFocusInWindow();
 
-        // Keyboard handling
+        // Main menu: owns its own mouse + keyboard input (click, hover,
+        // arrows / W / S, Enter, Esc).
+        mainMenu.setListener(new MainMenu.Listener() {
+            @Override
+            public void onNewGame() {
+                // The menu already created the new save file.
+                javax.swing.SwingUtilities.invokeLater(() -> startNewGame());
+            }
+
+            @Override
+            public void onContinue() {
+                javax.swing.SwingUtilities.invokeLater(() -> continueGame());
+            }
+
+            @Override
+            public void onExit() {
+                System.exit(0);
+            }
+        });
+        mainMenu.attachTo(this);
+
+        // Intro + victory screen keyboard handling.
+        // ENTER is handled on key RELEASE so that holding the key down
+        // can never "fall through" into the next screen.
         addKeyListener(new java.awt.event.KeyAdapter() {
 
             @Override
             public void keyPressed(java.awt.event.KeyEvent e) {
 
-                if (gameState == GameState.MENU
-                        && e.getKeyCode()
-                        == java.awt.event.KeyEvent.VK_ENTER) {
+                if (gameState == GameState.INTRO
+                        && introUI.isAcceptingInput()
+                        && (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER
+                        || e.getKeyCode() == java.awt.event.KeyEvent.VK_SPACE)) {
 
-                    startNewGame();
+                    introKeyArmed = true;
+                }
+            }
+
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+
+                int key = e.getKeyCode();
+
+                // ESC closes the room selector.
+                if (key == java.awt.event.KeyEvent.VK_ESCAPE
+                        && gameState == GameState.PLAYING
+                        && roomSelector.isVisible()) {
+                    roomSelector.hide();
+                    setCursor(java.awt.Cursor.getDefaultCursor());
+                    repaint();
+                    return;
+                }
+
+                // M toggles all sound.
+                if (key == java.awt.event.KeyEvent.VK_M) {
+                    SoundManager.setMuted(!SoundManager.isMuted());
+                    return;
+                }
+
+                boolean confirm = key == java.awt.event.KeyEvent.VK_ENTER
+                        || key == java.awt.event.KeyEvent.VK_SPACE;
+
+                if (gameState == GameState.INTRO && introKeyArmed && confirm) {
+
+                    introKeyArmed = false;
+
+                    if (introUI.isFinished()) {
+                        beginPlaying();
+                    } else {
+                        introUI.skipTyping();
+                    }
+
+                    return;
+                }
+
+                if (gameState == GameState.WIN
+                        && key == java.awt.event.KeyEvent.VK_ENTER) {
+
+                    if (winScreen.isReady()) {
+                        returnToMenu();
+                    } else {
+                        // Skip the door cinematic.
+                        winScreen.skip();
+                    }
                 }
             }
         });
@@ -114,6 +212,25 @@ public class GamePanel extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
 
+                // Victory screen: clicking the button returns to the menu.
+                if (gameState == GameState.WIN) {
+
+                    if (winScreen.isButtonClicked(
+                            e.getX(),
+                            e.getY(),
+                            getWidth())) {
+
+                        returnToMenu();
+
+                    } else if (!winScreen.isReady()) {
+
+                        // Click skips the door cinematic.
+                        winScreen.skip();
+                    }
+
+                    return;
+                }
+
                 // Handle the introduction screen first.
                 if (gameState == GameState.INTRO) {
 
@@ -121,10 +238,13 @@ public class GamePanel extends JPanel {
                             e.getX(),
                             e.getY())) {
 
-                        gameState = GameState.PLAYING;
+                        beginPlaying();
 
-                        requestFocusInWindow();
-                        repaint();
+                    } else if (!introUI.isFinished()
+                            && introUI.isAcceptingInput()) {
+
+                        // Click skips the typing.
+                        introUI.skipTyping();
                     }
 
                     return;
@@ -145,16 +265,49 @@ public class GamePanel extends JPanel {
                             getHeight()
                     );
 
+                    if (!roomSelector.isVisible()) {
+                        setCursor(java.awt.Cursor.getDefaultCursor());
+                    }
+
                     repaint();
                 }
             }
         });
 
-        // Room selector hover handling
+        // Hover handling (victory button + room selector)
         addMouseMotionListener(new MouseAdapter() {
 
             @Override
             public void mouseMoved(MouseEvent e) {
+
+                // Intro screen button hover.
+                if (gameState == GameState.INTRO) {
+
+                    introUI.handleMouseMove(e.getX(), e.getY());
+
+                    setCursor(introUI.isHovering()
+                            ? java.awt.Cursor.getPredefinedCursor(
+                                    java.awt.Cursor.HAND_CURSOR)
+                            : java.awt.Cursor.getDefaultCursor());
+
+                    return;
+                }
+
+                // Victory screen button hover.
+                if (gameState == GameState.WIN) {
+
+                    winScreen.handleMouseMove(
+                            e.getX(),
+                            e.getY(),
+                            getWidth());
+
+                    setCursor(winScreen.isHovering()
+                            ? java.awt.Cursor.getPredefinedCursor(
+                                    java.awt.Cursor.HAND_CURSOR)
+                            : java.awt.Cursor.getDefaultCursor());
+
+                    return;
+                }
 
                 if (gameState != GameState.PLAYING) {
                     return;
@@ -168,6 +321,11 @@ public class GamePanel extends JPanel {
                             getWidth(),
                             getHeight()
                     );
+
+                    setCursor(roomSelector.isHovering()
+                            ? java.awt.Cursor.getPredefinedCursor(
+                                    java.awt.Cursor.HAND_CURSOR)
+                            : java.awt.Cursor.getDefaultCursor());
 
                     repaint();
                 }
@@ -195,20 +353,117 @@ public class GamePanel extends JPanel {
 
         loadingScreen.show();
 
-        mainMenu.startNewGame();
-
+        // Fresh run: no puzzle progress and no items carried over.
+        inventoryManager.clear();
         puzzleManager.resetPuzzles();
 
-        // Load the starting room.
+        // Load the starting room (also writes the fresh save).
         loadRoom(3);
 
         // Show the story before allowing movement.
+        introKeyArmed = false;
+        introUI.start();
         gameState = GameState.INTRO;
 
         requestFocusInWindow();
         repaint();
 
         System.out.println("Introduction displayed.");
+    }
+
+    // --------------------------------------------------
+    // Continue a saved game
+    // --------------------------------------------------
+
+    private void continueGame() {
+
+        System.out.println("Continuing game...");
+
+        SaveData data = SaveManager.load();
+
+        // The menu already checks this, but never trust a file blindly.
+        if (data == null) {
+            System.out.println("Continue failed: save could not be read.");
+            gameState = GameState.MENU;
+            mainMenu.show();
+            repaint();
+            return;
+        }
+
+        gameState = GameState.LOADING;
+
+        loadingScreen.show();
+
+        // Restore progress BEFORE building the room, so the key is not
+        // spawned again if the player already picked it up.
+        puzzleManager.reloadFromSave();
+        inventoryManager.setItems(data.getInventory());
+
+        int roomId = data.getCurrentRoomId();
+
+        if (roomId < 1 || roomId > 3) {
+            roomId = 3;
+        }
+
+        restoring = true;
+
+        try {
+            loadRoom(roomId);
+        } finally {
+            restoring = false;
+        }
+
+        // Put the player back where they were, if that spot is valid.
+        int savedX = Math.round(data.getPlayerX());
+        int savedY = Math.round(data.getPlayerY());
+
+        if (player.canStandAt(
+                savedX,
+                savedY,
+                mapManager.getCurrentRoomConfig(),
+                mapManager.getCurrentMap())) {
+
+            player.setX(savedX);
+            player.setY(savedY);
+        }
+
+        inputSystem.reset();
+
+        gameState = GameState.PLAYING;
+
+        requestFocusInWindow();
+        repaint();
+    }
+
+    // --------------------------------------------------
+    // Save progress (room, position, inventory)
+    // --------------------------------------------------
+
+    // Puzzle progress is written separately by PuzzleManager; this keeps
+    // those values and updates everything else.
+    public void saveProgress() {
+
+        SaveData data = SaveManager.load();
+
+        // No save file (e.g. it was deleted when the game was won).
+        if (data == null) {
+            return;
+        }
+
+        data.setCurrentRoomId(currentRoomId);
+        data.setPlayerX(player.getX());
+        data.setPlayerY(player.getY());
+        data.setInventory(inventoryManager.getItemIds());
+
+        SaveManager.save(data);
+    }
+
+    // Called when the window is closing.
+    public void saveOnExit() {
+
+        if (gameState == GameState.PLAYING) {
+            saveProgress();
+        }
     }
 
     // --------------------------------------------------
@@ -230,9 +485,15 @@ public class GamePanel extends JPanel {
 
         changeMap(mapName);
 
+        currentRoomId = roomId;
+
         interactionSystem.setInteractables(
                 getInteractablesForRoom(roomId)
         );
+
+        if (!restoring) {
+            saveProgress();
+        }
     }
 
     // --------------------------------------------------
@@ -243,11 +504,51 @@ public class GamePanel extends JPanel {
 
         gameState = GameState.WIN;
 
+        // Starts the door-opening cinematic + status window and deletes the save file.
         winScreen.show();
 
         repaint();
 
         System.out.println("Game completed!");
+    }
+
+    // --------------------------------------------------
+    // Leave the intro and start playing
+    // --------------------------------------------------
+
+    private void beginPlaying() {
+
+        introUI.finish();
+
+        setCursor(java.awt.Cursor.getDefaultCursor());
+
+        gameState = GameState.PLAYING;
+
+        requestFocusInWindow();
+        repaint();
+    }
+
+    // --------------------------------------------------
+    // Return to the main menu (from the victory screen)
+    // --------------------------------------------------
+
+    private void returnToMenu() {
+
+        System.out.println("Returning to main menu...");
+
+        SoundManager.play(Sfx.CLICK);
+        SoundManager.fadeOut(Sfx.OUTDOORS, 600);
+
+        setCursor(java.awt.Cursor.getDefaultCursor());
+
+        gameState = GameState.MENU;
+
+        // Re-checks the save file (it was deleted when the game was won),
+        // so "Continue" is no longer offered.
+        mainMenu.show();
+
+        requestFocusInWindow();
+        repaint();
     }
 
     // --------------------------------------------------
@@ -314,15 +615,6 @@ public class GamePanel extends JPanel {
 
             if (puzzleManager.isPuzzleSolved(2)) {
 
-                list.add(
-                        new Note(
-                                370,
-                                200,
-                                "Digit 3 of 4: 1",
-                                "third_digit_1.png"
-                        )
-                );
-
                 list.add(createLivingRoomNote());
             }
         }
@@ -335,8 +627,8 @@ public class GamePanel extends JPanel {
 
             list.add(
                     new Safe(
-                            450,
-                            300,
+                            SAFE_X,
+                            SAFE_Y,
                             1,
                             puzzleManager,
                             inventoryManager,
@@ -361,8 +653,8 @@ public class GamePanel extends JPanel {
 
                 list.add(
                         new Key(
-                                484,
-                                300,
+                                Safe.keyDropX(SAFE_X),
+                                SAFE_Y,
                                 inventoryManager,
                                 infoUI
                         )
@@ -455,7 +747,20 @@ public class GamePanel extends JPanel {
             return;
         }
 
-        final int speed = 4;
+        // A popup is open: the timer keeps ticking inside the popup's own
+        // event loop, so freeze the game until it closes.
+        if (modalActive) {
+            return;
+        }
+
+        boolean selectorOpen = roomSelector.isVisible();
+
+        boolean horizontal = inputSystem.isLeft() != inputSystem.isRight();
+        boolean vertical = inputSystem.isUp() != inputSystem.isDown();
+
+        // 4 px straight, 3 px per axis on a diagonal (3*sqrt2 = 4.2),
+        // so diagonal movement isn't ~41% faster.
+        final int speed = (horizontal && vertical) ? 3 : 4;
 
         int dx = 0;
         int dy = 0;
@@ -476,6 +781,12 @@ public class GamePanel extends JPanel {
             dx += speed;
         }
 
+        // Standing still while the room selector is open.
+        if (selectorOpen) {
+            dx = 0;
+            dy = 0;
+        }
+
         player.moveBy(
                 dx,
                 dy,
@@ -487,8 +798,24 @@ public class GamePanel extends JPanel {
 
         interactionSystem.update(player);
 
-        if (inputSystem.consumeInteract()) {
-            interactionSystem.tryInteract();
+        if (inputSystem.consumeInteract() && !selectorOpen) {
+
+            modalActive = true;
+
+            try {
+                // May open a modal popup; blocks here until it closes.
+                interactionSystem.tryInteract();
+            } finally {
+                modalActive = false;
+
+                // Key releases that happened inside the popup never reached
+                // us, so forget any "held" keys.
+                inputSystem.reset();
+            }
+
+            if (gameState == GameState.PLAYING) {
+                saveProgress();
+            }
         }
 
         int selectedRoomId =
@@ -527,43 +854,6 @@ public class GamePanel extends JPanel {
         );
 
         String text = "LOADING...";
-
-        int textWidth =
-                g.getFontMetrics().stringWidth(text);
-
-        g.drawString(
-                text,
-                (getWidth() - textWidth) / 2,
-                getHeight() / 2
-        );
-    }
-
-    // --------------------------------------------------
-    // Victory screen fallback
-    // --------------------------------------------------
-
-    private void drawWinFallback(Graphics2D g) {
-
-        g.setColor(new Color(25, 18, 14));
-
-        g.fillRect(
-                0,
-                0,
-                getWidth(),
-                getHeight()
-        );
-
-        g.setColor(new Color(235, 218, 180));
-
-        g.setFont(
-                new java.awt.Font(
-                        "Serif",
-                        java.awt.Font.BOLD,
-                        50
-                )
-        );
-
-        String text = "YOU ESCAPED!";
 
         int textWidth =
                 g.getFontMetrics().stringWidth(text);
@@ -638,11 +928,13 @@ public class GamePanel extends JPanel {
 
                     player.draw(g2);
 
-                    interactionSystem.drawPrompt(
-                            g2,
-                            getWidth(),
-                            getHeight()
-                    );
+                    if (!roomSelector.isVisible()) {
+                        interactionSystem.drawPrompt(
+                                g2,
+                                getWidth(),
+                                getHeight()
+                        );
+                    }
 
                     infoUI.draw(
                             g2,
