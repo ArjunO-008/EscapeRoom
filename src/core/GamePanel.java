@@ -90,12 +90,6 @@ public class GamePanel extends JPanel {
         setPreferredSize(new Dimension(960, 640));
         setBackground(Color.BLACK);
 
-        // Synthesizes the sound effects in the background.
-        SoundManager.init();
-
-        // Music plays from the moment the game opens (menu, intro, gameplay).
-        SoundManager.startMusic();
-
         // Initialize UI screens
         loadingScreen = new LoadingScreen();
         mainMenu = new MainMenu();
@@ -121,6 +115,12 @@ public class GamePanel extends JPanel {
 
         // Map manager
         mapManager = new MapManager();
+
+        // Synthesizes the sound effects in the background.
+        SoundManager.init();
+
+        // Music plays from the moment the game opens (menu, intro, gameplay).
+        SoundManager.startMusic();
 
         // Input handling
         inputSystem = new InputSystem(this);
@@ -160,7 +160,7 @@ public class GamePanel extends JPanel {
                 if (gameState == GameState.INTRO
                         && introUI.isAcceptingInput()
                         && (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER
-                        || e.getKeyCode() == java.awt.event.KeyEvent.VK_SPACE)) {
+                                || e.getKeyCode() == java.awt.event.KeyEvent.VK_SPACE)) {
 
                     introKeyArmed = true;
                 }
@@ -272,8 +272,7 @@ public class GamePanel extends JPanel {
                             e.getX(),
                             e.getY(),
                             getWidth(),
-                            getHeight()
-                    );
+                            getHeight());
 
                     if (!roomSelector.isVisible()) {
                         setCursor(java.awt.Cursor.getDefaultCursor());
@@ -329,8 +328,7 @@ public class GamePanel extends JPanel {
                             e.getX(),
                             e.getY(),
                             getWidth(),
-                            getHeight()
-                    );
+                            getHeight());
 
                     setCursor(roomSelector.isHovering()
                             ? java.awt.Cursor.getPredefinedCursor(
@@ -491,8 +489,7 @@ public class GamePanel extends JPanel {
             case 3 -> "living_room";
 
             default -> throw new IllegalArgumentException(
-                    "Unknown room ID: " + roomId
-            );
+                    "Unknown room ID: " + roomId);
         };
 
         changeMap(mapName);
@@ -500,8 +497,7 @@ public class GamePanel extends JPanel {
         currentRoomId = roomId;
 
         interactionSystem.setInteractables(
-                getInteractablesForRoom(roomId)
-        );
+                getInteractablesForRoom(roomId));
 
         if (!restoring) {
             saveProgress();
@@ -581,8 +577,7 @@ public class GamePanel extends JPanel {
                 370,
                 200,
                 "Digit 3 of 4: 1",
-                "third_digit_1.png"
-        );
+                "third_digit_1.png");
     }
 
     // --------------------------------------------------
@@ -607,9 +602,7 @@ public class GamePanel extends JPanel {
                             32,
                             64,
                             20,
-                            () -> roomSelector.show(3)
-                    )
-            );
+                            () -> roomSelector.show(3)));
 
             list.add(
                     new Door(
@@ -617,9 +610,7 @@ public class GamePanel extends JPanel {
                             450,
                             inventoryManager,
                             infoUI,
-                            this::winGame
-                    )
-            );
+                            this::winGame));
 
             list.add(
                     new SymbolLock(
@@ -628,10 +619,7 @@ public class GamePanel extends JPanel {
                             2,
                             puzzleManager,
                             () -> interactionSystem.addInteractable(
-                                    createLivingRoomNote()
-                            )
-                    )
-            );
+                                    createLivingRoomNote())));
 
             if (puzzleManager.isPuzzleSolved(2)) {
 
@@ -653,9 +641,7 @@ public class GamePanel extends JPanel {
                             puzzleManager,
                             inventoryManager,
                             interactionSystem,
-                            infoUI
-                    )
-            );
+                            infoUI));
 
             list.add(
                     new RoomDoor(
@@ -664,9 +650,7 @@ public class GamePanel extends JPanel {
                             110,
                             65,
                             30,
-                            () -> goThroughDoor(3)
-                    )
-            );
+                            () -> goThroughDoor(3)));
 
             if (puzzleManager.isPuzzleSolved(1)
                     && !inventoryManager.hasItem(Key.ITEM_ID)) {
@@ -676,9 +660,7 @@ public class GamePanel extends JPanel {
                                 Safe.keyDropX(SAFE_X),
                                 SAFE_Y,
                                 inventoryManager,
-                                infoUI
-                        )
-                );
+                                infoUI));
             }
 
             if (puzzleManager.isPuzzleSolved(2)) {
@@ -688,9 +670,7 @@ public class GamePanel extends JPanel {
                                 630,
                                 320,
                                 "Digit 1 of 4: 4",
-                                "first_digit_4.png"
-                        )
-                );
+                                "first_digit_4.png"));
             }
         }
 
@@ -707,9 +687,7 @@ public class GamePanel extends JPanel {
                             38,
                             95,
                             30,
-                            () -> goThroughDoor(3)
-                    )
-            );
+                            () -> goThroughDoor(3)));
 
             if (puzzleManager.isPuzzleSolved(2)) {
 
@@ -718,18 +696,14 @@ public class GamePanel extends JPanel {
                                 400,
                                 350,
                                 "Digit 2 of 4: 7",
-                                "second_digit_7.png"
-                        )
-                );
+                                "second_digit_7.png"));
 
                 list.add(
                         new Note(
                                 430,
                                 230,
                                 "Digit 4 of 4: 9",
-                                "fourth_digit_9.png"
-                        )
-                );
+                                "fourth_digit_9.png"));
             }
         }
 
@@ -754,8 +728,7 @@ public class GamePanel extends JPanel {
 
         } else {
 
-            map.RoomConfig roomConfig =
-                    mapManager.getCurrentRoomConfig();
+            map.RoomConfig roomConfig = mapManager.getCurrentRoomConfig();
 
             player.setX(roomConfig.getSpawnX());
             player.setY(roomConfig.getSpawnY());
@@ -851,8 +824,7 @@ public class GamePanel extends JPanel {
                 dx,
                 dy,
                 mapManager.getCurrentRoomConfig(),
-                mapManager.getCurrentMap()
-        );
+                mapManager.getCurrentMap());
 
         player.update();
 
@@ -880,8 +852,7 @@ public class GamePanel extends JPanel {
             }
         }
 
-        int selectedRoomId =
-                roomSelector.getSelectedRoomId();
+        int selectedRoomId = roomSelector.getSelectedRoomId();
 
         if (selectedRoomId != -1) {
             loadRoom(selectedRoomId);
@@ -903,8 +874,7 @@ public class GamePanel extends JPanel {
                 0,
                 0,
                 getWidth(),
-                getHeight()
-        );
+                getHeight());
 
         g.setColor(new Color(235, 218, 180));
 
@@ -912,20 +882,16 @@ public class GamePanel extends JPanel {
                 new java.awt.Font(
                         "Serif",
                         java.awt.Font.BOLD,
-                        36
-                )
-        );
+                        36));
 
         String text = "LOADING...";
 
-        int textWidth =
-                g.getFontMetrics().stringWidth(text);
+        int textWidth = g.getFontMetrics().stringWidth(text);
 
         g.drawString(
                 text,
                 (getWidth() - textWidth) / 2,
-                getHeight() / 2
-        );
+                getHeight() / 2);
     }
 
     // --------------------------------------------------
@@ -948,8 +914,7 @@ public class GamePanel extends JPanel {
                     mainMenu.draw(
                             g2,
                             getWidth(),
-                            getHeight()
-                    );
+                            getHeight());
 
                     break;
 
@@ -972,8 +937,7 @@ public class GamePanel extends JPanel {
                     introUI.draw(
                             g2,
                             getWidth(),
-                            getHeight()
-                    );
+                            getHeight());
 
                     break;
 
@@ -984,8 +948,7 @@ public class GamePanel extends JPanel {
                     roomSelector.draw(
                             g2,
                             getWidth(),
-                            getHeight()
-                    );
+                            getHeight());
 
                     interactionSystem.drawObjects(g2);
 
@@ -995,20 +958,17 @@ public class GamePanel extends JPanel {
                         interactionSystem.drawPrompt(
                                 g2,
                                 getWidth(),
-                                getHeight()
-                        );
+                                getHeight());
                     }
 
                     infoUI.draw(
                             g2,
                             getWidth(),
-                            getHeight()
-                    );
+                            getHeight());
 
                     inventoryUI.draw(
                             g2,
-                            getHeight()
-                    );
+                            getHeight());
 
                     break;
 
@@ -1017,8 +977,7 @@ public class GamePanel extends JPanel {
                     winScreen.draw(
                             g2,
                             getWidth(),
-                            getHeight()
-                    );
+                            getHeight());
 
                     break;
             }
