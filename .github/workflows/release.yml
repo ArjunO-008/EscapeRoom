@@ -1,0 +1,90 @@
+name: Build & Release
+
+# Every push to main builds Windows + Linux packages and publishes them.
+# The release name, version and description come from release.json:
+#   - same version  -> the existing release is updated (new files + notes)
+#   - new version   -> a new release (tag v<version>) is created
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - ".gitignore"
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Linux packaging tools (.deb)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y fakeroot
+
+      - name: Build
+        shell: bash
+        run: ./scripts/package.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ runner.os }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(jq -r .version release.json)
+          TITLE=$(jq -r .title release.json)
+          TAG="v$VERSION"
+
+          {
+            jq -r .description release.json
+            echo
+            echo "### What's new"
+            jq -r '.notes[] | "- " + .' release.json
+            echo
+            echo "### Downloads"
+            echo "- **Windows:** \`*-windows-setup.exe\` (installer) or \`*-windows.zip\` (portable, run EscapeRoom.exe)"
+            echo "- **Linux:** \`*-linux-x64.deb\` (Debian/Ubuntu) or \`*-linux-x64.tar.gz\` (run bin/EscapeRoom)"
+            echo "- Java is bundled, nothing else to install."
+            echo
+            echo "_Build from commit ${GITHUB_SHA::7}_"
+          } > notes.md
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TITLE $VERSION" --notes-file notes.md --latest
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* --target "$GITHUB_SHA" \
+              --title "$TITLE $VERSION" --notes-file notes.md --latest
+          fi

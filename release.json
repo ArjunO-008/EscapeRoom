@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "title": "Escape Room",
+  "description": "Top-down 2D escape room game. Solve the puzzles and find your way out of the house.",
+  "notes": [
+    "Offline-ready: all sound effects are generated in code and the music ships with the game",
+    "Standalone Windows and Linux builds, no Java installation needed",
+    "Saves are stored in your user folder, so the game can live anywhere"
+  ]
+}
